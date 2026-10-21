@@ -48,6 +48,7 @@ github.com/wyosa/duoplus-go-sdk/
 ├── team/                   # 团队模块：订单、余额、资源
 ├── examples/               # 可运行示例
 ├── client.go               # 根客户端入口
+├── LICENSE
 ├── README.md               # English
 └── README.zh-CN.md
 ```
@@ -698,3 +699,7 @@ SDK 以**英文** API 文档（https://help.duoplus.net/docs/api-reference）为
 - 当前 SDK 是依据 DuoPlus 公开文档封装的非官方实现
 - 若 DuoPlus 后续调整字段、路径或业务码含义，SDK 也需要同步更新
 - 在生产环境接入前，建议先用测试资源验证关键工作流
+
+## 许可证
+
+[MIT](LICENSE)

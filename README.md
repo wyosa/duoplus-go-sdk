@@ -50,6 +50,7 @@ github.com/wyosa/duoplus-go-sdk/
 ├── team/                   # Team: orders, balance, resources
 ├── examples/               # Runnable examples
 ├── client.go               # Root client entry point
+├── LICENSE
 └── README.md
 ```
 
@@ -706,3 +707,7 @@ If you plan to maintain this SDK publicly over the long term:
 - This is an unofficial SDK built from the public DuoPlus docs
 - If DuoPlus changes fields, paths or the meaning of business codes, the SDK needs to be updated too
 - Before going to production, verify the key workflows against test resources
+
+## License
+
+[MIT](LICENSE)
