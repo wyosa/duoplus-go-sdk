@@ -2,14 +2,20 @@ package clouddisk
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 
-	"github.com/difyz9/duoplus-go-sdk/common"
-	"github.com/difyz9/duoplus-go-sdk/internal/clientcore"
+	"github.com/wyosa/duoplus-go-sdk/common"
+	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
 )
 
 const (
 	pathList      = "/api/v1/cloudDisk/list"
 	pathPushFiles = "/api/v1/cloudDisk/pushFiles"
+	pathDelete    = "/api/v1/cloudDisk/delFiles"
+	pathSignedURL = "/api/v1/cloudDisk/signedUrl"
 )
 
 type Client struct {
@@ -61,6 +67,24 @@ type PushFilesResponse struct {
 	Fail    []PushFilesFailure `json:"fail"`
 }
 
+type DeleteRequest struct {
+	IDs []string `json:"ids"`
+}
+
+type SignedURLRequest struct {
+	Name  string `json:"name"`
+	IsApp int    `json:"is_app,omitempty"`
+	Pkg   string `json:"pkg,omitempty"`
+}
+
+type SignedURLResponse struct {
+	Method           string            `json:"method"`
+	SignedURL        string            `json:"signedUrl"`
+	Headers          map[string]string `json:"headers"`
+	Name             string            `json:"name"`
+	OriginalFileName string            `json:"original_file_name"`
+}
+
 func (c *Client) List(ctx context.Context, req ListRequest) (*ListResponse, error) {
 	var resp ListResponse
 	if err := c.core.Do(ctx, pathList, req, &resp); err != nil {
@@ -75,4 +99,53 @@ func (c *Client) PushFiles(ctx context.Context, req PushFilesRequest) (*PushFile
 		return nil, err
 	}
 	return &resp, nil
+}
+
+func (c *Client) Delete(ctx context.Context, ids []string) (*common.MessageResponse, error) {
+	var resp common.MessageResponse
+	if err := c.core.Do(ctx, pathDelete, DeleteRequest{IDs: ids}, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) SignedURL(ctx context.Context, req SignedURLRequest) (*SignedURLResponse, error) {
+	var resp SignedURLResponse
+	if err := c.core.Do(ctx, pathSignedURL, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// Upload requests a presigned URL and uploads size bytes from body to it.
+func (c *Client) Upload(ctx context.Context, req SignedURLRequest, body io.Reader, size int64) (*SignedURLResponse, error) {
+	signed, err := c.SignedURL(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.core.Upload(ctx, signed.Method, signed.SignedURL, signed.Headers, body, size); err != nil {
+		return nil, err
+	}
+	return signed, nil
+}
+
+// UploadFile uploads a local file; req.Name defaults to the file's base name.
+func (c *Client) UploadFile(ctx context.Context, path string, req SignedURLRequest) (*SignedURLResponse, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if info.IsDir() {
+		return nil, fmt.Errorf("upload: %s is a directory", path)
+	}
+	if req.Name == "" {
+		req.Name = filepath.Base(path)
+	}
+	return c.Upload(ctx, req, f, info.Size())
 }

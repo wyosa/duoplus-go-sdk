@@ -3,8 +3,8 @@ package cloudphone
 import (
 	"context"
 
-	"github.com/difyz9/duoplus-go-sdk/common"
-	"github.com/difyz9/duoplus-go-sdk/internal/clientcore"
+	"github.com/wyosa/duoplus-go-sdk/common"
+	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
 )
 
 const (
@@ -29,6 +29,15 @@ const (
 	pathPurchase        = "/api/v1/cloudPhone/purchase"
 	pathRenewal         = "/api/v1/cloudPhone/renewal"
 	pathShare           = "/api/v1/cloudPhone/share"
+	pathInitProxy       = "/api/v1/cloudPhone/initProxy"
+	pathProxySwitch     = "/api/v1/cloudPhone/proxySwitch"
+	pathTimezoneList    = "/api/v1/mobile/timezoneList"
+	pathLanguageList    = "/api/v1/mobile/languageList"
+	pathNewPhone        = "/api/v1/cloudPhone/newPhone"
+	pathLive            = "/api/v1/cloudPhone/live"
+	pathScan            = "/api/v1/cloudPhone/scan"
+	pathAutoRenewal     = "/api/v1/cloudPhone/autoRenewal"
+	pathConvertVersion  = "/api/v1/cloudPhone/convertVersion"
 )
 
 type Client struct {
@@ -59,19 +68,33 @@ type ListRequest struct {
 	common.PaginationRequest
 }
 
+type GroupRef struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type Phone struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Status      int    `json:"status"`
-	ADB         string `json:"adb"`
-	ADBPassword string `json:"adb_password"`
-	Remark      string `json:"remark"`
-	CreatedAt   string `json:"created_at"`
-	ExpiredAt   string `json:"expired_at"`
-	IP          string `json:"ip"`
-	Area        string `json:"area"`
-	OS          string `json:"os"`
-	Size        string `json:"size"`
+	ID                       string      `json:"id"`
+	Name                     string      `json:"name"`
+	Status                   int         `json:"status"`
+	ADB                      string      `json:"adb"`
+	ADBPassword              string      `json:"adb_password"`
+	ADBStatus                int         `json:"adb_status"`
+	HTTPStatus               common.Text `json:"http_status"`
+	Group                    []GroupRef  `json:"group"`
+	Remark                   string      `json:"remark"`
+	CreatedAt                string      `json:"created_at"`
+	ExpiredAt                string      `json:"expired_at"`
+	IP                       string      `json:"ip"`
+	Area                     string      `json:"area"`
+	Region                   string      `json:"region"`
+	OS                       string      `json:"os"`
+	Size                     string      `json:"size"`
+	AndroidVersionConfigured bool        `json:"android_version_configured"`
+	ConvertVersionTimes      int         `json:"convert_version_times"`
+	FreeNewMockTimes         int         `json:"free_new_mock_times"`
+	PaidNewMockTimes         int         `json:"paid_new_mock_times"`
+	NewMockTimes             int         `json:"new_mock_times"`
 }
 
 type ListResponse struct {
@@ -93,8 +116,9 @@ type StatusResponse struct {
 	List []StatusItem `json:"list"`
 }
 
+// InfoRequest follows the EN docs, which name the field image_ids (the CN docs use image_id).
 type InfoRequest struct {
-	ImageID string `json:"image_id"`
+	ImageID string `json:"image_ids"`
 }
 
 type ProxySettings struct {
@@ -156,17 +180,21 @@ type DeviceSettings struct {
 }
 
 type Detail struct {
-	ID        string            `json:"id"`
-	Name      string            `json:"name"`
-	Remark    string            `json:"remark"`
-	OS        string            `json:"os"`
-	Proxy     ProxySettings     `json:"proxy"`
-	GPS       GPSSettings       `json:"gps"`
-	Locale    LocaleSettings    `json:"locale"`
-	SIM       SIMSettings       `json:"sim"`
-	Bluetooth BluetoothSettings `json:"bluetooth"`
-	WiFi      WiFiSettings      `json:"wifi"`
-	Device    DeviceSettings    `json:"device"`
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	Remark      string            `json:"remark"`
+	OS          string            `json:"os"`
+	ADB         string            `json:"adb"`
+	ADBPassword string            `json:"adb_password"`
+	ADBStatus   int               `json:"adb_status"`
+	Group       []GroupRef        `json:"group"`
+	Proxy       ProxySettings     `json:"proxy"`
+	GPS         GPSSettings       `json:"gps"`
+	Locale      LocaleSettings    `json:"locale"`
+	SIM         SIMSettings       `json:"sim"`
+	Bluetooth   BluetoothSettings `json:"bluetooth"`
+	WiFi        WiFiSettings      `json:"wifi"`
+	Device      DeviceSettings    `json:"device"`
 }
 
 type UpdateRequest struct {
@@ -185,6 +213,7 @@ type UpdateItem struct {
 	Bluetooth *BluetoothSettings `json:"bluetooth,omitempty"`
 	WiFi      *WiFiSettings      `json:"wifi,omitempty"`
 	Device    *DeviceUpdate      `json:"device,omitempty"`
+	Station   *StationUpdate     `json:"station,omitempty"`
 }
 
 type ProxyUpdate struct {
@@ -193,9 +222,9 @@ type ProxyUpdate struct {
 }
 
 type GPSUpdate struct {
-	Type      int     `json:"type"`
-	Longitude float64 `json:"longitude,omitempty"`
-	Latitude  float64 `json:"latitude,omitempty"`
+	Type      int      `json:"type"`
+	Longitude *float64 `json:"longitude,omitempty"`
+	Latitude  *float64 `json:"latitude,omitempty"`
 }
 
 type LocaleUpdate struct {
@@ -206,6 +235,7 @@ type LocaleUpdate struct {
 
 type SIMUpdate struct {
 	Status   int    `json:"status,omitempty"`
+	NumberID string `json:"number_id,omitempty"`
 	Country  string `json:"country,omitempty"`
 	MSISDN   string `json:"msisdn,omitempty"`
 	Operator string `json:"operator,omitempty"`
@@ -225,6 +255,11 @@ type DeviceUpdate struct {
 	GAID      string `json:"gaid,omitempty"`
 }
 
+type StationUpdate struct {
+	LAC int `json:"lac,omitempty"`
+	CID int `json:"cid,omitempty"`
+}
+
 type ModelListRequest struct {
 	OS int `json:"os"`
 }
@@ -238,7 +273,7 @@ type ModelListResponse map[string]map[string]ModelInfo
 type BatchRootRequest struct {
 	ImageIDs []string `json:"image_ids"`
 	Status   int      `json:"status"`
-	Packages []string `json:"packages,omitempty"`
+	Packages []string `json:"pkgs,omitempty"`
 }
 
 type CommandRequest struct {
@@ -254,7 +289,8 @@ type CommandResult struct {
 }
 
 type SetADBIPWhitelistRequest struct {
-	IPs []string `json:"ips"`
+	IPs    []string `json:"ips"`
+	Append bool     `json:"append,omitempty"`
 }
 
 type UpdateSharePasswordRequest struct {
@@ -310,11 +346,11 @@ type ResolutionListResponse struct {
 }
 
 type PurchaseRequest struct {
-	OS            string `json:"os"`
+	OS            string `json:"os,omitempty"`
 	Quantity      int    `json:"quantity"`
 	Duration      string `json:"duration,omitempty"`
 	CouponCode    string `json:"coupon_code,omitempty"`
-	RenewalStatus int    `json:"renewal_status,omitempty"`
+	RenewalStatus *int   `json:"renewal_status,omitempty"`
 }
 
 type RenewRequest struct {
@@ -340,6 +376,100 @@ type ShareConfig struct {
 }
 
 type ShareResponse map[string]string
+
+type InitProxyRequest struct {
+	Images []InitProxyItem `json:"images"`
+}
+
+type InitProxyItem struct {
+	ImageID       string      `json:"image_id"`
+	OS            string      `json:"os,omitempty"`
+	Name          string      `json:"name,omitempty"`
+	IPScanChannel string      `json:"ip_scan_channel"`
+	Proxy         ProxyConfig `json:"proxy"`
+	DPIName       string      `json:"dpi_name,omitempty"`
+	NetworkMode   int         `json:"network_mode,omitempty"`
+	Brand         string      `json:"brand,omitempty"`
+	Model         string      `json:"model,omitempty"`
+	Location      *Location   `json:"location,omitempty"`
+	SIM           *SIMConfig  `json:"sim,omitempty"`
+	Locale        *InitLocale `json:"locale,omitempty"`
+}
+
+type ProxyConfig struct {
+	ID       string `json:"id,omitempty"`
+	Host     string `json:"host,omitempty"`
+	Port     int    `json:"port,omitempty"`
+	User     string `json:"user,omitempty"`
+	Password string `json:"password,omitempty"`
+	Protocol string `json:"protocol,omitempty"`
+}
+
+type Location struct {
+	Longitude float64 `json:"longitude"`
+	Latitude  float64 `json:"latitude"`
+}
+
+type SIMConfig struct {
+	Type        int    `json:"type,omitempty"`
+	Country     string `json:"country,omitempty"`
+	PhoneNumber string `json:"phone_number,omitempty"`
+}
+
+type InitLocale struct {
+	Country  string `json:"country"`
+	Timezone string `json:"timezone"`
+	Language string `json:"language,omitempty"`
+}
+
+type SwitchRequest struct {
+	ImageIDs []string `json:"image_ids"`
+	Status   int      `json:"status"`
+}
+
+type TimezoneListRequest struct {
+	ISO string `json:"iso"`
+}
+
+type Option struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type ResetDeviceRequest struct {
+	ImageID     string        `json:"image_id"`
+	ProxyID     string        `json:"proxy_id,omitempty"`
+	DNS         int           `json:"dns,omitempty"`
+	Model       string        `json:"model,omitempty"`
+	GPS         *GPSUpdate    `json:"gps,omitempty"`
+	Locale      *LocaleUpdate `json:"locale,omitempty"`
+	SIM         *SIMConfig    `json:"sim,omitempty"`
+	DataType    int           `json:"data_type,omitempty"`
+	DPIName     string        `json:"dpi_name,omitempty"`
+	NetworkMode int           `json:"network_mode,omitempty"`
+	KeepGP      *int          `json:"keep_gp,omitempty"`
+}
+
+type LiveRequest struct {
+	ImageID string `json:"image_id"`
+	ID      string `json:"id,omitempty"`
+	Status  int    `json:"status,omitempty"`
+	Loop    int    `json:"loop,omitempty"`
+}
+
+type ScanRequest struct {
+	ImageID string `json:"image_id"`
+	ID      string `json:"id"`
+}
+
+type ConvertVersionRequest struct {
+	Images []ConvertVersionItem `json:"images"`
+}
+
+type ConvertVersionItem struct {
+	ImageID string `json:"image_id"`
+	OS      string `json:"os"`
+}
 
 func (c *Client) List(ctx context.Context, req ListRequest) (*ListResponse, error) {
 	var resp ListResponse
@@ -426,11 +556,11 @@ func (c *Client) CloseADB(ctx context.Context, imageIDs []string) (*common.Opera
 }
 
 func (c *Client) SetADBIPWhitelist(ctx context.Context, ips []string) (*common.MessageResponse, error) {
-	var resp common.MessageResponse
-	if err := c.core.Do(ctx, pathSetADBWhitelist, SetADBIPWhitelistRequest{IPs: ips}, &resp); err != nil {
-		return nil, err
-	}
-	return &resp, nil
+	return c.adbIPWhitelist(ctx, SetADBIPWhitelistRequest{IPs: ips})
+}
+
+func (c *Client) AppendADBIPWhitelist(ctx context.Context, ips []string) (*common.MessageResponse, error) {
+	return c.adbIPWhitelist(ctx, SetADBIPWhitelistRequest{IPs: ips, Append: true})
 }
 
 func (c *Client) UpdateSharePassword(ctx context.Context, req UpdateSharePasswordRequest) (*common.MessageResponse, error) {
@@ -495,6 +625,86 @@ func (c *Client) Share(ctx context.Context, req ShareRequest) (ShareResponse, er
 		return nil, err
 	}
 	return resp, nil
+}
+
+func (c *Client) InitProxy(ctx context.Context, req InitProxyRequest) (*common.MessageResponse, error) {
+	var resp common.MessageResponse
+	if err := c.core.Do(ctx, pathInitProxy, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) SetProxyEnabled(ctx context.Context, imageIDs []string, enabled bool) (*common.OperationResult, error) {
+	var resp common.OperationResult
+	if err := c.core.Do(ctx, pathProxySwitch, SwitchRequest{ImageIDs: imageIDs, Status: common.BoolToInt(enabled)}, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) Timezones(ctx context.Context, iso string) ([]Option, error) {
+	var resp []Option
+	if err := c.core.Do(ctx, pathTimezoneList, TimezoneListRequest{ISO: iso}, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *Client) Languages(ctx context.Context) ([]Option, error) {
+	var resp []Option
+	if err := c.core.Do(ctx, pathLanguageList, nil, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *Client) ResetDevice(ctx context.Context, req ResetDeviceRequest) (*common.MessageResponse, error) {
+	var resp common.MessageResponse
+	if err := c.core.Do(ctx, pathNewPhone, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) Live(ctx context.Context, req LiveRequest) (*common.MessageResponse, error) {
+	var resp common.MessageResponse
+	if err := c.core.Do(ctx, pathLive, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) ScanCode(ctx context.Context, imageID, fileID string) (*common.MessageResponse, error) {
+	var resp common.MessageResponse
+	if err := c.core.Do(ctx, pathScan, ScanRequest{ImageID: imageID, ID: fileID}, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) SetAutoRenewal(ctx context.Context, imageIDs []string, enabled bool) (*common.MessageResponse, error) {
+	var resp common.MessageResponse
+	if err := c.core.Do(ctx, pathAutoRenewal, SwitchRequest{ImageIDs: imageIDs, Status: common.BoolToInt(enabled)}, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) ConvertVersion(ctx context.Context, req ConvertVersionRequest) (*common.OperationResult, error) {
+	var resp common.OperationResult
+	if err := c.core.Do(ctx, pathConvertVersion, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) adbIPWhitelist(ctx context.Context, req SetADBIPWhitelistRequest) (*common.MessageResponse, error) {
+	var resp common.MessageResponse
+	if err := c.core.Do(ctx, pathSetADBWhitelist, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
 
 func (c *Client) operation(ctx context.Context, path string, imageIDs []string) (*common.OperationResult, error) {

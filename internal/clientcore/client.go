@@ -4,20 +4,27 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
 )
 
 const (
-	DefaultBaseURL     = "https://openapi.duoplus.cn"
-	DefaultIntlBaseURL = "https://openapi.duoplus.net"
-	DefaultLanguage    = "zh"
+	DefaultBaseURL     = "https://openapi.duoplus.net"
+	DefaultIntlBaseURL = DefaultBaseURL
+	DefaultCNBaseURL   = "https://openapi.duoplus.cn"
+	DefaultLanguage    = "en"
 	defaultTimeout     = 30 * time.Second
 	defaultMinInterval = time.Second
+
+	maxResponseBytes  = 10 << 20
+	maxErrorBodyBytes = 4 << 10
 )
 
 type Config struct {
@@ -35,7 +42,7 @@ type Client struct {
 	minInterval time.Duration
 
 	mu          sync.Mutex
-	nextRequest time.Time
+	nextRequest map[string]time.Time
 }
 
 type APIError struct {
@@ -52,19 +59,14 @@ type envelope struct {
 }
 
 func New(apiKey string, cfg Config) (*Client, error) {
-	baseURL := strings.TrimRight(strings.TrimSpace(cfg.BaseURL), "/")
-	if baseURL == "" {
-		baseURL = DefaultBaseURL
+	baseURL, err := normalizeBaseURL(cfg.BaseURL)
+	if err != nil {
+		return nil, err
 	}
 
 	lang := strings.TrimSpace(cfg.Lang)
 	if lang == "" {
 		lang = DefaultLanguage
-	}
-
-	httpClient := cfg.HTTPClient
-	if httpClient == nil {
-		httpClient = &http.Client{Timeout: defaultTimeout}
 	}
 
 	minInterval := cfg.MinInterval
@@ -76,8 +78,9 @@ func New(apiKey string, cfg Config) (*Client, error) {
 		apiKey:      apiKey,
 		baseURL:     baseURL,
 		lang:        lang,
-		httpClient:  httpClient,
+		httpClient:  withoutRedirects(cfg.HTTPClient),
 		minInterval: minInterval,
+		nextRequest: map[string]time.Time{},
 	}, nil
 }
 
@@ -106,7 +109,7 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 		ctx = context.Background()
 	}
 
-	if err := c.waitTurn(ctx); err != nil {
+	if err := c.waitTurn(ctx, path); err != nil {
 		return err
 	}
 
@@ -134,15 +137,18 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
 	if err != nil {
 		return fmt.Errorf("read response: %w", err)
+	}
+	if len(body) > maxResponseBytes {
+		return fmt.Errorf("read response: body exceeds %d bytes", maxResponseBytes)
 	}
 
 	var apiResp envelope
 	if err := json.Unmarshal(body, &apiResp); err != nil {
 		if resp.StatusCode >= http.StatusBadRequest {
-			return &APIError{HTTPStatus: resp.StatusCode, Body: string(body)}
+			return &APIError{HTTPStatus: resp.StatusCode, Body: truncate(body)}
 		}
 		return fmt.Errorf("decode response: %w", err)
 	}
@@ -152,7 +158,7 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 			HTTPStatus: resp.StatusCode,
 			Code:       apiResp.Code,
 			Message:    apiResp.Message,
-			Body:       string(body),
+			Body:       truncate(body),
 		}
 	}
 
@@ -167,14 +173,74 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 	return nil
 }
 
-func (c *Client) waitTurn(ctx context.Context) error {
+// Upload sends body to a presigned storage URL returned by the API. The API
+// key is not sent, and the client timeout is lifted so that large files are
+// bounded only by ctx. size must be the exact body length.
+func (c *Client) Upload(ctx context.Context, method, signedURL string, headers map[string]string, body io.Reader, size int64) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if method == "" {
+		method = http.MethodPut
+	}
+	if method != http.MethodPut && method != http.MethodPost {
+		return fmt.Errorf("upload: unsupported method %q", method)
+	}
+
+	u, err := url.Parse(signedURL)
+	if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
+		return errors.New("upload: invalid signed url")
+	}
+
+	if size == 0 {
+		body = http.NoBody
+	}
+	req, err := http.NewRequestWithContext(ctx, method, signedURL, body)
+	if err != nil {
+		return errors.New("upload: build request failed")
+	}
+	req.ContentLength = size
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+
+	hc := *c.httpClient
+	hc.Timeout = 0
+	resp, err := hc.Do(req)
+	if err != nil {
+		// url.Error would include the signed URL, which is a credential.
+		var urlErr *url.Error
+		if errors.As(err, &urlErr) {
+			err = urlErr.Err
+		}
+		return fmt.Errorf("upload: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
+	if err != nil {
+		return fmt.Errorf("upload: read response: %w", err)
+	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return &APIError{HTTPStatus: resp.StatusCode, Body: truncate(respBody)}
+	}
+
+	var apiResp envelope
+	if json.Unmarshal(respBody, &apiResp) == nil && apiResp.Code != 0 && apiResp.Code != http.StatusOK {
+		return &APIError{HTTPStatus: resp.StatusCode, Code: apiResp.Code, Message: apiResp.Message, Body: truncate(respBody)}
+	}
+	return nil
+}
+
+// waitTurn enforces the documented limit of 1 QPS per interface.
+func (c *Client) waitTurn(ctx context.Context, path string) error {
 	c.mu.Lock()
 	now := time.Now()
-	when := c.nextRequest
+	when := c.nextRequest[path]
 	if when.Before(now) {
 		when = now
 	}
-	c.nextRequest = when.Add(c.minInterval)
+	c.nextRequest[path] = when.Add(c.minInterval)
 	c.mu.Unlock()
 
 	wait := time.Until(when)
@@ -191,4 +257,68 @@ func (c *Client) waitTurn(ctx context.Context) error {
 	case <-timer.C:
 		return nil
 	}
+}
+
+func normalizeBaseURL(raw string) (string, error) {
+	raw = strings.TrimRight(strings.TrimSpace(raw), "/")
+	if raw == "" {
+		return DefaultBaseURL, nil
+	}
+
+	u, err := url.Parse(raw)
+	if err != nil {
+		var urlErr *url.Error
+		if errors.As(err, &urlErr) {
+			err = urlErr.Err
+		}
+		return "", fmt.Errorf("invalid base url: %w", err)
+	}
+	if u.User != nil {
+		return "", errors.New("invalid base url: credentials in url are not allowed")
+	}
+	if u.Host == "" || u.RawQuery != "" || u.Fragment != "" {
+		return "", fmt.Errorf("invalid base url %q: expected scheme://host[/path]", raw)
+	}
+
+	switch u.Scheme {
+	case "https":
+	case "http":
+		if !isLoopback(u.Hostname()) {
+			return "", fmt.Errorf("invalid base url %q: plain http is only allowed for loopback hosts", raw)
+		}
+	default:
+		return "", fmt.Errorf("invalid base url %q: scheme must be https", raw)
+	}
+
+	return raw, nil
+}
+
+func isLoopback(host string) bool {
+	if host == "localhost" {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
+}
+
+// withoutRedirects copies hc and disables redirects: net/http forwards custom
+// headers such as DuoPlus-API-Key to any redirect target, including other hosts.
+func withoutRedirects(hc *http.Client) *http.Client {
+	var c http.Client
+	if hc != nil {
+		c = *hc
+	} else {
+		c.Timeout = defaultTimeout
+	}
+	c.CheckRedirect = func(req *http.Request, _ []*http.Request) error {
+		return fmt.Errorf("refusing to follow redirect to %s", req.URL.Redacted())
+	}
+	return &c
+}
+
+func truncate(body []byte) string {
+	if len(body) <= maxErrorBodyBytes {
+		return string(body)
+	}
+	return string(body[:maxErrorBodyBytes]) + "...(truncated)"
 }

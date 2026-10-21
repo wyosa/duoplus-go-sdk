@@ -3,8 +3,8 @@ package group
 import (
 	"context"
 
-	"github.com/difyz9/duoplus-go-sdk/common"
-	"github.com/difyz9/duoplus-go-sdk/internal/clientcore"
+	"github.com/wyosa/duoplus-go-sdk/common"
+	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
 )
 
 const (
@@ -47,15 +47,15 @@ type GroupImagesRequest struct {
 
 type CreateItem struct {
 	Name   string `json:"name"`
-	Sort   int    `json:"sort,omitempty"`
+	Sort   *int   `json:"sort,omitempty"`
 	Remark string `json:"remark,omitempty"`
 }
 
 type UpdateItem struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Sort   int    `json:"sort,omitempty"`
-	Remark string `json:"remark,omitempty"`
+	ID     string  `json:"id"`
+	Name   string  `json:"name"`
+	Sort   *int    `json:"sort,omitempty"`
+	Remark *string `json:"remark,omitempty"`
 }
 
 type CreateRequest struct {

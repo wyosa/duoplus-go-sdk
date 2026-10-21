@@ -1,6 +1,8 @@
 # DuoPlus Go SDK
 
-基于 DuoPlus OpenAPI 的非官方 Golang SDK。
+[English](README.md) | 简体中文
+
+基于 [DuoPlus OpenAPI](https://help.duoplus.net/docs/api-reference) 的非官方 Golang SDK。
 
 适合这几类场景：
 
@@ -10,7 +12,7 @@
 
 ## 功能概览
 
-已覆盖 DuoPlus API 文档中公开可识别的 OpenAPI 页面：
+SDK 已覆盖的模块：
 
 - 云手机管理
 - 云号码
@@ -20,22 +22,19 @@
 - 应用管理
 - 云盘管理
 - 自动化
+- 团队
 
-当前未纳入的页面：
+### 不在范围内
 
-- 一键新机
-- 高级命令
-- 上传文件
-- 团队管理
-- 邀请成员
-- 绑定邮箱
+API 文档中所有 `/api/v1` 接口均已封装。以下内容不在范围内：
 
-这些页面在文档中是产品操作说明，没有公开 `POST /api/v1/...` 接口路径与请求结构，因此 SDK 不对其做猜测性封装。
+- **AI 控制云手机 API**：使用独立网关（`agent-gateway.duoplus.net`）、Bearer 鉴权和不同的响应格式。
+- **高级命令**（`DuoPlusDumpUI`、`hideAccb`）：它们是命令字符串而不是接口，可以直接通过 `client.CloudPhones.Command(...)` 执行。
 
 ## 项目结构
 
 ```text
-github.com/difyz9/duoplus-go-sdk/
+github.com/wyosa/duoplus-go-sdk/
 ├── app/                    # 应用管理模块
 ├── automation/             # 自动化模块
 ├── clouddisk/              # 云盘管理模块
@@ -46,9 +45,11 @@ github.com/difyz9/duoplus-go-sdk/
 ├── internal/clientcore/    # HTTP 核心、鉴权、限流、错误处理
 ├── proxy/                  # 代理管理模块
 ├── subscriptionstartup/    # 包月开机模块
+├── team/                   # 团队模块：订单、余额、资源
 ├── examples/               # 可运行示例
 ├── client.go               # 根客户端入口
-└── readme.md
+├── README.md               # English
+└── README.zh-CN.md
 ```
 
 ## 安装
@@ -58,13 +59,13 @@ github.com/difyz9/duoplus-go-sdk/
 - Go 1.22+
 
 ```bash
-go get github.com/difyz9/duoplus-go-sdk
+go get github.com/wyosa/duoplus-go-sdk
 ```
 
 建议在业务项目中显式安装版本：
 
 ```bash
-go get github.com/difyz9/duoplus-go-sdk@latest
+go get github.com/wyosa/duoplus-go-sdk@latest
 ```
 
 如果你要在生产环境长期使用，建议固定 tag，而不是始终跟随最新提交。
@@ -76,35 +77,44 @@ SDK 按 DuoPlus 当前公开文档的通用约定实现：
 - 所有公开接口统一使用 `POST`
 - 请求体为 `application/json`
 - 认证头为 `DuoPlus-API-Key`
-- 语言头为 `Lang`
-- 默认请求域名为 `https://openapi.duoplus.cn`
-- 国际环境可切换为 `https://openapi.duoplus.net`
-- 默认最小请求间隔为 1 秒，用于遵守文档中的 QPS 限制
+- 语言头为 `Lang`（`en`、`zh`、`zh-TW`、`ru`）
+- 默认请求域名为 `https://openapi.duoplus.net`
+- 中国大陆环境可切换为 `https://openapi.duoplus.cn`（`duoplus.DefaultCNBaseURL`）
+- 文档规定**每个接口** QPS 为 1，SDK 默认对同一接口的两次调用至少间隔 1 秒
 
 响应通常遵循这样的业务结构：
 
 ```json
 {
-	"code": 0,
+	"code": 200,
 	"data": {},
-	"message": "success"
+	"message": "Success"
 }
 ```
 
 其中：
 
-- `code = 0` 表示业务成功
-- 非 0 会被 SDK 尽量解析为 `*duoplus.APIError`
+- `code = 200` 表示业务成功
+- 其他 code 会返回 `*duoplus.APIError`
+
+## 安全
+
+- **从不跟随重定向。** `net/http` 会把 `DuoPlus-API-Key` 头转发给任意重定向目标（包括其他域名）。SDK 会复制 HTTP 客户端
+  （包括通过 `WithHTTPClient` 传入的客户端）并拒绝所有重定向，不会修改你自己的 `*http.Client`。
+- **强制 HTTPS。** `WithBaseURL` 只接受 `https://`，`http://` 仅允许用于本地回环地址（`localhost`、`127.0.0.1`、`::1`）测试。
+  带账号密码、查询参数或片段的 URL 会被拒绝。
+- **限制响应大小**为 10 MiB，`APIError.Body` 截断为 4 KiB，避免过大或敏感的原始响应进入日志。
+- 请把 API Key 放在环境变量或密钥管理系统中。`.env` 已被 git 忽略，参见 `.env.example`。
 
 ## 设计说明
 
-- 默认请求域名为中国大陆地址 `https://openapi.duoplus.cn`
-- 非中国大陆环境可切换为 `duoplus.DefaultIntlBaseURL`
-- 默认请求语言为 `zh`
-- 默认按文档限制内置 1 秒最小请求间隔
+- 默认请求域名为 `https://openapi.duoplus.net`
+- 默认请求语言为 `en`
+- 按文档限制，每个接口内置 1 秒最小请求间隔
 - 所有接口统一使用 `POST + JSON`
 - 业务错误返回 `*duoplus.APIError`
 - 通用类型集中放在 `common` 包，模块请求/响应类型放在对应子包中
+- `0` 或 `""` 有业务含义的可选请求字段使用指针类型（例如 `RenewalStatus *int`）。用 `common.Ptr(0)` 显式发送 0，保持 `nil` 则不发送
 
 ## 模块导入说明
 
@@ -112,9 +122,9 @@ SDK 按 DuoPlus 当前公开文档的通用约定实现：
 
 ```go
 import (
-	duoplus "github.com/difyz9/duoplus-go-sdk"
-	"github.com/difyz9/duoplus-go-sdk/cloudphone"
-	"github.com/difyz9/duoplus-go-sdk/common"
+	duoplus "github.com/wyosa/duoplus-go-sdk"
+	"github.com/wyosa/duoplus-go-sdk/cloudphone"
+	"github.com/wyosa/duoplus-go-sdk/common"
 )
 ```
 
@@ -135,9 +145,9 @@ import (
 	"log"
 	"os"
 
-	duoplus "github.com/difyz9/duoplus-go-sdk"
-	"github.com/difyz9/duoplus-go-sdk/cloudphone"
-	"github.com/difyz9/duoplus-go-sdk/common"
+	duoplus "github.com/wyosa/duoplus-go-sdk"
+	"github.com/wyosa/duoplus-go-sdk/cloudphone"
+	"github.com/wyosa/duoplus-go-sdk/common"
 )
 
 func main() {
@@ -194,13 +204,13 @@ client, err := duoplus.NewClient(
 - `duoplus.WithHTTPClient(...)`
 - `duoplus.WithMinInterval(...)`
 
-国际环境初始化示例：
+中国大陆环境初始化示例：
 
 ```go
 client, err := duoplus.NewClient(
 	apiKey,
-	duoplus.WithBaseURL(duoplus.DefaultIntlBaseURL),
-	duoplus.WithLanguage("en"),
+	duoplus.WithBaseURL(duoplus.DefaultCNBaseURL),
+	duoplus.WithLanguage("zh"),
 )
 ```
 
@@ -216,6 +226,7 @@ client, err := duoplus.NewClient(
 - `client.Apps`
 - `client.CloudDisk`
 - `client.Automation`
+- `client.Team`
 
 ### 3. 从对应 package 引入请求/响应类型
 
@@ -282,14 +293,19 @@ client, err := duoplus.NewClient(
 - 开机、关机、重启
 - 状态查询
 - 详情查询
-- 参数批量修改
+- 参数批量修改（包括 GPS、使用云号码的 SIM、基站）
+- 代理初始化（`InitProxy`）、开启/关闭代理（`SetProxyEnabled`）
+- 时区与语言列表（`Timezones`、`Languages`）
+- 一键新机（`ResetDevice`）
 - 手机型号列表
 - Root 权限设置
 - ADB 命令执行
-- ADB 开关与 IP 白名单
+- ADB 开关与 IP 白名单（`SetADBIPWhitelist` 覆盖，`AppendADBIPWhitelist` 追加）
 - 分享与分享密码管理
 - 标签、连接用户、资源列表、分辨率
-- 购买与续费
+- 直播（`Live`）、扫码（`ScanCode`）
+- 购买、续费与自动续费（`SetAutoRenewal`）
+- 转换安卓版本（`ConvertVersion`）
 
 对应 package：`cloudphone`
 
@@ -298,6 +314,10 @@ client, err := duoplus.NewClient(
 - 云号码列表
 - 云号码短信查询
 - 写入短信到云机
+- 购买套餐详情、套餐时长（`PurchasePackages`、`PackageDurations`）
+- 购买（`Purchase`）
+- 续费套餐详情与续费（`RenewalPackages`、`Renew`）
+- 自动续费（`SetAutoRenewal`）
 
 对应 package：`cloudnumber`
 
@@ -319,6 +339,8 @@ client, err := duoplus.NewClient(
 - 批量删除
 - 批量刷新 URL
 - 修改代理
+- 检测代理（`Check`；检测失败时调用本身仍然成功，请检查 `Success` 和 `Tips`）
+- 自动续费（`SetAutoRenewal`）
 
 对应 package：`proxy`
 
@@ -327,6 +349,7 @@ client, err := duoplus.NewClient(
 - 列表
 - 购买
 - 续费
+- 自动续费（`SetAutoRenewal`）
 
 对应 package：`subscriptionstartup`
 
@@ -346,13 +369,15 @@ client, err := duoplus.NewClient(
 
 - 文件列表
 - 推送文件到云机
+- 上传本地文件（`UploadFile`、`Upload`，或单独调用 `SignedURL`）
+- 删除文件（`Delete`）
 
 对应 package：`clouddisk`
 
 ### 自动化
 
-- 自定义模板列表
-- 官方模板列表
+- 自定义模板列表与详情（`UserTemplateInfo`）
+- 官方模板列表与详情（`OfficialTemplateInfo`）
 - 创建定时任务
 - 创建循环任务
 - 循环任务列表
@@ -365,6 +390,14 @@ client, err := duoplus.NewClient(
 - 取消/重新执行任务
 
 对应 package：`automation`
+
+### 团队
+
+- 订单列表（`Orders`）
+- 余额查询（`Balance`）
+- 团队资源（`Resources`）
+
+对应 package：`team`
 
 ## 使用案例
 
@@ -455,21 +488,37 @@ if err != nil {
 }
 ```
 
-### 案例 5：购买云手机
+### 案例 5：购买云手机（不自动续费）
 
 ```go
 order, err := client.CloudPhones.Purchase(ctx, cloudphone.PurchaseRequest{
 	OS:            "12A",
 	Quantity:      1,
 	Duration:      "30",
-	RenewalStatus: 1,
+	RenewalStatus: common.Ptr(0), // 服务端默认为 1（开启自动续费）
 })
 if err != nil {
 	return err
 }
 
-fmt.Println(order.OrderID)
+fmt.Println(order.OrderID, order.ProductIDs)
 ```
+
+### 案例 6：上传 APK 到云盘
+
+```go
+file, err := client.CloudDisk.UploadFile(ctx, "./app.apk", clouddisk.SignedURLRequest{
+	IsApp: 1,
+	Pkg:   "com.example.app",
+})
+if err != nil {
+	return err
+}
+
+fmt.Println(file.Name)
+```
+
+文件直接上传到预签名存储 URL，不携带 API Key。HTTP 客户端的超时不作用于上传，大文件请用 `ctx` 控制超时。
 
 ## 示例目录
 
@@ -591,7 +640,7 @@ export DUOPLUS_DEST_DIR=/sdcard/Download
 
 - 真实执行可能触发云手机开机计费
 - 脚本默认 dry-run，就是为了避免误操作
-- 我当前测试到的真实资源状态是：有 2 台已关机云手机、1 个云盘文件、0 个云手机分组，因此这个示例会优先选取关机云机和首个云盘文件
+- 脚本会优先选取关机的云手机和找到的第一个云盘文件
 
 ## 错误处理
 
@@ -615,6 +664,25 @@ _ = resp
 - 先用 `errors.As(err, &apiErr)` 判断是否为业务错误
 - 查询型接口可以做有限重试，但要尊重 1 秒限流约束
 - 对开机、推送、购买类接口，建议记录目标 ID 和返回结果，便于排查和审计
+- 批量操作即使调用成功，也可能在 `Fail`（以及 `FailReason`）中返回单项失败
+
+## 文档依据
+
+SDK 以**英文** API 文档（https://help.duoplus.net/docs/api-reference）为准。与中文文档不一致时，以英文为准：
+
+| 接口 | 英文文档（采用） | 中文文档 |
+| --- | --- | --- |
+| 详情 `/cloudPhone/info` | `image_ids`（string） | `image_id` |
+| 批量设置 Root `/cloudPhone/batchRoot` | `pkgs` | `packages` |
+| 写入短信 `/cloudNumber/imageWriteSms` | `image_id` 为数组 | `image_id` 为字符串 |
+
+唯一的例外是云号码自动续费：英文页面误写为代理的路径 `/api/v1/proxy/autoRenewal`，SDK 使用中文文档中的 `/api/v1/cloudNumber/autoRenewal`。
+
+文档自身的不一致：
+
+- 修改循环任务（`/automation/savePlan`）：示例中 `weeks`/`days` 为数字，而创建循环任务中为字符串。SDK 发送字符串。
+- 购买/续费接口的 `duration` 标注为必填，但服务端默认 30 天，因此为空时 SDK 不发送该字段。
+- 参数表与示例的类型不一致时（例如模板 `id` 标注为 `int`，示例却是 `"mgRg1"`），SDK 采用示例及其他接口使用的类型。
 
 ## 发布建议
 
@@ -622,7 +690,7 @@ _ = resp
 
 - 使用语义化版本号，例如 `v0.1.0`、`v0.2.0`
 - 发生 breaking change 时及时升级主版本或至少在 README 标明
-- 新增 API 时同步更新 README 的“功能列表”和“示例目录”
+- 新增 API 时同步更新 README 的“功能列表”
 - 保持 `examples/` 中示例可运行，避免文档和实现漂移
 
 ## 说明

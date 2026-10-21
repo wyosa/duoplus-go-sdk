@@ -3,8 +3,8 @@ package proxy
 import (
 	"context"
 
-	"github.com/difyz9/duoplus-go-sdk/common"
-	"github.com/difyz9/duoplus-go-sdk/internal/clientcore"
+	"github.com/wyosa/duoplus-go-sdk/common"
+	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
 )
 
 const (
@@ -13,6 +13,9 @@ const (
 	pathDelete  = "/api/v1/proxy/delete"
 	pathRefresh = "/api/v1/proxy/refresh"
 	pathUpdate  = "/api/v1/proxy/update"
+
+	pathCheck       = "/api/v1/proxy/check"
+	pathAutoRenewal = "/api/v1/proxy/autoRenewal"
 )
 
 type Client struct {
@@ -28,12 +31,14 @@ type ListRequest struct {
 }
 
 type Item struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Host string `json:"host"`
-	Port string `json:"port"`
-	User string `json:"user"`
-	Area string `json:"area"`
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	Host      string   `json:"host"`
+	Port      string   `json:"port"`
+	User      string   `json:"user"`
+	Area      string   `json:"area"`
+	GroupIDs  []string `json:"group_ids"`
+	GroupName []string `json:"group_name"`
 }
 
 type ListResponse struct {
@@ -74,8 +79,40 @@ type IDsRequest struct {
 	IDs []string `json:"ids"`
 }
 
+type CheckRequest struct {
+	ProxyID       string `json:"proxy_id,omitempty"`
+	Protocol      string `json:"protocol,omitempty"`
+	Host          string `json:"host,omitempty"`
+	Port          int    `json:"port,omitempty"`
+	User          string `json:"user,omitempty"`
+	Password      string `json:"password,omitempty"`
+	IPScanChannel string `json:"ip_scan_channel,omitempty"`
+}
+
+// CheckResponse is returned with code 200 even when the check fails;
+// inspect Success and Tips.
+type CheckResponse struct {
+	Success   bool   `json:"success"`
+	IP        string `json:"ip"`
+	Country   string `json:"country"`
+	Region    string `json:"region"`
+	City      string `json:"city"`
+	Timezone  string `json:"timezone"`
+	Longitude string `json:"longitude"`
+	Latitude  string `json:"latitude"`
+	Tips      string `json:"tips"`
+	User      string `json:"user"`
+	Password  string `json:"password"`
+}
+
+type AutoRenewalRequest struct {
+	ProxyIDs []string `json:"proxy_ids"`
+	Type     int      `json:"type"`
+}
+
 type UpdateRequest struct {
 	ID            string `json:"id"`
+	Protocol      string `json:"protocol,omitempty"`
 	Host          string `json:"host,omitempty"`
 	Port          int    `json:"port,omitempty"`
 	User          string `json:"user,omitempty"`
@@ -126,6 +163,22 @@ func (c *Client) RefreshURLs(ctx context.Context, ids []string) (*common.IDsOper
 func (c *Client) Update(ctx context.Context, req UpdateRequest) (*UpdateResponse, error) {
 	var resp UpdateResponse
 	if err := c.core.Do(ctx, pathUpdate, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) Check(ctx context.Context, req CheckRequest) (*CheckResponse, error) {
+	var resp CheckResponse
+	if err := c.core.Do(ctx, pathCheck, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) SetAutoRenewal(ctx context.Context, proxyIDs []string, enabled bool) (*common.MessageResponse, error) {
+	var resp common.MessageResponse
+	if err := c.core.Do(ctx, pathAutoRenewal, AutoRenewalRequest{ProxyIDs: proxyIDs, Type: common.BoolToInt(enabled)}, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil

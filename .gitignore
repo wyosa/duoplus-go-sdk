@@ -1,5 +1,8 @@
-.next
-node_modules
 .env
-dist
-.vercel
+*.test
+*.out
+coverage.*
+/bin/
+.DS_Store
+.idea/
+.vscode/

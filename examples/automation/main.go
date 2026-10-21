@@ -6,9 +6,9 @@ import (
 	"log"
 	"os"
 
-	duoplus "github.com/difyz9/duoplus-go-sdk"
-	"github.com/difyz9/duoplus-go-sdk/automation"
-	"github.com/difyz9/duoplus-go-sdk/common"
+	duoplus "github.com/wyosa/duoplus-go-sdk"
+	"github.com/wyosa/duoplus-go-sdk/automation"
+	"github.com/wyosa/duoplus-go-sdk/common"
 )
 
 func main() {

@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	duoplus "github.com/difyz9/duoplus-go-sdk"
-	"github.com/difyz9/duoplus-go-sdk/clouddisk"
-	"github.com/difyz9/duoplus-go-sdk/cloudphone"
-	"github.com/difyz9/duoplus-go-sdk/common"
+	duoplus "github.com/wyosa/duoplus-go-sdk"
+	"github.com/wyosa/duoplus-go-sdk/clouddisk"
+	"github.com/wyosa/duoplus-go-sdk/cloudphone"
+	"github.com/wyosa/duoplus-go-sdk/common"
 )
 
 const (

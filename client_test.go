@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/difyz9/duoplus-go-sdk/common"
+	"github.com/wyosa/duoplus-go-sdk/common"
 )
 
 func TestTextUnmarshalJSON(t *testing.T) {
@@ -38,6 +38,12 @@ func TestNewClientRequiresAPIKey(t *testing.T) {
 	}
 }
 
+func TestNewClientRejectsInsecureBaseURL(t *testing.T) {
+	if _, err := NewClient("test-key", WithBaseURL("http://openapi.duoplus.net")); err == nil {
+		t.Fatal("expected error for plain http base url")
+	}
+}
+
 func TestNewClientInitializesServices(t *testing.T) {
 	client, err := NewClient("test-key")
 	if err != nil {
@@ -52,7 +58,7 @@ func TestNewClientInitializesServices(t *testing.T) {
 		t.Fatal("expected module service fields to be initialized")
 	}
 
-	if client.CloudDisk == nil || client.Automation == nil {
+	if client.CloudDisk == nil || client.Automation == nil || client.Team == nil {
 		t.Fatal("expected auxiliary service fields to be initialized")
 	}
 }

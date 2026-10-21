@@ -3,8 +3,8 @@ package app
 import (
 	"context"
 
-	"github.com/difyz9/duoplus-go-sdk/common"
-	"github.com/difyz9/duoplus-go-sdk/internal/clientcore"
+	"github.com/wyosa/duoplus-go-sdk/common"
+	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
 )
 
 const (

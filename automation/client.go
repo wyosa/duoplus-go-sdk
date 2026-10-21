@@ -3,8 +3,8 @@ package automation
 import (
 	"context"
 
-	"github.com/difyz9/duoplus-go-sdk/common"
-	"github.com/difyz9/duoplus-go-sdk/internal/clientcore"
+	"github.com/wyosa/duoplus-go-sdk/common"
+	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
 )
 
 const (
@@ -20,6 +20,8 @@ const (
 	pathTaskLogList          = "/api/v1/automation/taskLogList"
 	pathUpdateTaskTime       = "/api/v1/automation/updateTaskTime"
 	pathSetTaskStatus        = "/api/v1/automation/setTaskStatus"
+	pathUserTemplateInfo     = "/api/v1/automation/userTemplateInfo"
+	pathOfficialTemplateInfo = "/api/v1/automation/officialTemplateInfo"
 )
 
 type Client struct {
@@ -44,6 +46,48 @@ type Template struct {
 type TemplateListResponse struct {
 	List []Template `json:"list"`
 	common.Pagination
+}
+
+type OfficialTemplate struct {
+	Template
+	Version           []string `json:"version"`
+	Lang              []string `json:"lang"`
+	RPAAndroidVersion string   `json:"rpa_android_version"`
+	IsAIRPA           int      `json:"is_ai_rpa"`
+	IsCloudDisk       int      `json:"is_cloud_disk"`
+	IsPinned          bool     `json:"is_pinned"`
+	PinnedAt          string   `json:"pinned_at"`
+}
+
+type OfficialTemplateListResponse struct {
+	List []OfficialTemplate `json:"list"`
+	common.Pagination
+}
+
+type TemplateInfoRequest struct {
+	ID string `json:"id"`
+}
+
+type TemplateConfigItem struct {
+	Key      string `json:"key"`
+	Value    any    `json:"value"`
+	Type     string `json:"type"`
+	Required bool   `json:"required"`
+	Desc     string `json:"desc"`
+}
+
+type TemplateDetail struct {
+	ID            string               `json:"id"`
+	AppID         string               `json:"app_id"`
+	Name          string               `json:"name"`
+	Desc          string               `json:"desc"`
+	ExceptionType int                  `json:"exception_type"`
+	DumpType      int                  `json:"dump_type"`
+	Config        []TemplateConfigItem `json:"config"`
+}
+
+type templateInfoResponse struct {
+	Info TemplateDetail `json:"info"`
 }
 
 type ConfigValue struct {
@@ -196,12 +240,28 @@ func (c *Client) ListUserTemplates(ctx context.Context, req TemplateListRequest)
 	return &resp, nil
 }
 
-func (c *Client) ListOfficialTemplates(ctx context.Context, req TemplateListRequest) (*TemplateListResponse, error) {
-	var resp TemplateListResponse
+func (c *Client) ListOfficialTemplates(ctx context.Context, req TemplateListRequest) (*OfficialTemplateListResponse, error) {
+	var resp OfficialTemplateListResponse
 	if err := c.core.Do(ctx, pathOfficialTemplateList, req, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
+}
+
+func (c *Client) UserTemplateInfo(ctx context.Context, id string) (*TemplateDetail, error) {
+	return c.templateInfo(ctx, pathUserTemplateInfo, id)
+}
+
+func (c *Client) OfficialTemplateInfo(ctx context.Context, id string) (*TemplateDetail, error) {
+	return c.templateInfo(ctx, pathOfficialTemplateInfo, id)
+}
+
+func (c *Client) templateInfo(ctx context.Context, path, id string) (*TemplateDetail, error) {
+	var resp templateInfoResponse
+	if err := c.core.Do(ctx, path, TemplateInfoRequest{ID: id}, &resp); err != nil {
+		return nil, err
+	}
+	return &resp.Info, nil
 }
 
 func (c *Client) CreateTask(ctx context.Context, req CreateTaskRequest) (*common.MessageResponse, error) {

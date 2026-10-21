@@ -6,20 +6,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/difyz9/duoplus-go-sdk/app"
-	"github.com/difyz9/duoplus-go-sdk/automation"
-	"github.com/difyz9/duoplus-go-sdk/clouddisk"
-	"github.com/difyz9/duoplus-go-sdk/cloudnumber"
-	"github.com/difyz9/duoplus-go-sdk/cloudphone"
-	"github.com/difyz9/duoplus-go-sdk/group"
-	"github.com/difyz9/duoplus-go-sdk/internal/clientcore"
-	"github.com/difyz9/duoplus-go-sdk/proxy"
-	"github.com/difyz9/duoplus-go-sdk/subscriptionstartup"
+	"github.com/wyosa/duoplus-go-sdk/app"
+	"github.com/wyosa/duoplus-go-sdk/automation"
+	"github.com/wyosa/duoplus-go-sdk/clouddisk"
+	"github.com/wyosa/duoplus-go-sdk/cloudnumber"
+	"github.com/wyosa/duoplus-go-sdk/cloudphone"
+	"github.com/wyosa/duoplus-go-sdk/group"
+	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
+	"github.com/wyosa/duoplus-go-sdk/proxy"
+	"github.com/wyosa/duoplus-go-sdk/subscriptionstartup"
+	"github.com/wyosa/duoplus-go-sdk/team"
 )
 
 const (
 	DefaultBaseURL     = clientcore.DefaultBaseURL
 	DefaultIntlBaseURL = clientcore.DefaultIntlBaseURL
+	DefaultCNBaseURL   = clientcore.DefaultCNBaseURL
 	DefaultLanguage    = clientcore.DefaultLanguage
 )
 
@@ -43,6 +45,7 @@ type Client struct {
 	Apps                 *app.Client
 	CloudDisk            *clouddisk.Client
 	Automation           *automation.Client
+	Team                 *team.Client
 
 	core *clientcore.Client
 }
@@ -82,6 +85,7 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 		Apps:                 app.New(core),
 		CloudDisk:            clouddisk.New(core),
 		Automation:           automation.New(core),
+		Team:                 team.New(core),
 		core:                 core,
 	}, nil
 }
@@ -102,6 +106,8 @@ func WithLanguage(lang string) Option {
 	}
 }
 
+// WithHTTPClient sets the HTTP client used for API calls. The client is copied
+// and redirects are always refused so the API key never leaves the API host.
 func WithHTTPClient(httpClient *http.Client) Option {
 	return func(cfg *config) {
 		if httpClient != nil {

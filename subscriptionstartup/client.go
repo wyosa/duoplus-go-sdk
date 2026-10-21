@@ -3,14 +3,16 @@ package subscriptionstartup
 import (
 	"context"
 
-	"github.com/difyz9/duoplus-go-sdk/common"
-	"github.com/difyz9/duoplus-go-sdk/internal/clientcore"
+	"github.com/wyosa/duoplus-go-sdk/common"
+	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
 )
 
 const (
 	pathList     = "/api/v1/subscriptionStartup/list"
 	pathPurchase = "/api/v1/subscriptionStartup/purchase"
 	pathRenewal  = "/api/v1/subscriptionStartup/renewal"
+
+	pathAutoRenewal = "/api/v1/subscriptionStartup/autoRenewal"
 )
 
 type Client struct {
@@ -25,7 +27,8 @@ type ListRequest struct {
 	ID            string `json:"id,omitempty"`
 	Name          string `json:"name,omitempty"`
 	Remark        string `json:"remark,omitempty"`
-	RenewalStatus int    `json:"renewal_status,omitempty"`
+	RenewalStatus *int   `json:"renewal_status,omitempty"`
+	FreeStatus    *int   `json:"free_status,omitempty"`
 	SortBy        string `json:"sort_by,omitempty"`
 	Order         string `json:"order,omitempty"`
 	common.PaginationRequest
@@ -38,6 +41,7 @@ type Item struct {
 	RAM           string `json:"ram"`
 	ROM           string `json:"rom"`
 	RenewalStatus int    `json:"renewal_status"`
+	FreeStatus    int    `json:"free_status"`
 	Remark        string `json:"remark"`
 	ExpiredAt     string `json:"expired_at"`
 	CreatedAt     string `json:"created_at"`
@@ -53,13 +57,18 @@ type PurchaseRequest struct {
 	Duration      string `json:"duration,omitempty"`
 	Quantity      int    `json:"quantity"`
 	CouponCode    string `json:"coupon_code,omitempty"`
-	RenewalStatus int    `json:"renewal_status,omitempty"`
+	RenewalStatus *int   `json:"renewal_status,omitempty"`
 }
 
 type RenewRequest struct {
 	PhoneIDs   []string `json:"phone_ids"`
 	Duration   string   `json:"duration,omitempty"`
 	CouponCode string   `json:"coupon_code,omitempty"`
+}
+
+type AutoRenewalRequest struct {
+	PhoneIDs []string `json:"phone_ids"`
+	Status   int      `json:"status"`
 }
 
 func (c *Client) List(ctx context.Context, req ListRequest) (*ListResponse, error) {
@@ -81,6 +90,14 @@ func (c *Client) Purchase(ctx context.Context, req PurchaseRequest) (*common.Ord
 func (c *Client) Renew(ctx context.Context, req RenewRequest) (*common.OrderResponse, error) {
 	var resp common.OrderResponse
 	if err := c.core.Do(ctx, pathRenewal, req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *Client) SetAutoRenewal(ctx context.Context, phoneIDs []string, enabled bool) (*common.MessageResponse, error) {
+	var resp common.MessageResponse
+	if err := c.core.Do(ctx, pathAutoRenewal, AutoRenewalRequest{PhoneIDs: phoneIDs, Status: common.BoolToInt(enabled)}, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
