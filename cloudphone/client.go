@@ -48,23 +48,31 @@ func New(core *clientcore.Client) *Client {
 	return &Client{core: core}
 }
 
+// ListRequest allows at most 100 items per page; status filters use strings.
 type ListRequest struct {
-	ImageIDs       []string `json:"image_id,omitempty"`
-	Name           string   `json:"name,omitempty"`
-	GroupID        string   `json:"group_id,omitempty"`
-	Remark         string   `json:"remark,omitempty"`
-	IPs            []string `json:"ips,omitempty"`
-	LinkStatus     []string `json:"link_status,omitempty"`
-	ProxyID        string   `json:"proxy_id,omitempty"`
-	ShareStatus    []string `json:"share_status,omitempty"`
+	ImageIDs []string `json:"image_id,omitempty"`
+	Name     string   `json:"name,omitempty"`
+	GroupID  string   `json:"group_id,omitempty"`
+	Remark   string   `json:"remark,omitempty"`
+	IPs      []string `json:"ips,omitempty"`
+	// LinkStatus contains the decimal-string forms of Phone.Status values.
+	LinkStatus []string `json:"link_status,omitempty"`
+	ProxyID    string   `json:"proxy_id,omitempty"`
+	// ShareStatus uses "0" (unconfigured), "1" (shared), or "2" (not shared).
+	ShareStatus []string `json:"share_status,omitempty"`
+	// StartPhoneType uses "1" (prefer subscription), "2" (subscription), or "3" (temporary).
 	StartPhoneType []string `json:"start_phone_type,omitempty"`
-	ADBStatus      []string `json:"adb_status,omitempty"`
-	RenewalStatus  []string `json:"renewal_status,omitempty"`
-	SortBy         string   `json:"sort_by,omitempty"`
-	Order          string   `json:"order,omitempty"`
-	UserIDs        []string `json:"user_ids,omitempty"`
-	TagIDs         []string `json:"tag_ids,omitempty"`
-	RegionIDs      []string `json:"region_id,omitempty"`
+	// ADBStatus uses "0" (disabled) or "1" (enabled).
+	ADBStatus []string `json:"adb_status,omitempty"`
+	// RenewalStatus uses "0" (disabled) or "1" (enabled).
+	RenewalStatus []string `json:"renewal_status,omitempty"`
+	// SortBy is name, created_at, expired_at, or os.
+	SortBy string `json:"sort_by,omitempty"`
+	// Order is asc or desc.
+	Order     string   `json:"order,omitempty"`
+	UserIDs   []string `json:"user_ids,omitempty"`
+	TagIDs    []string `json:"tag_ids,omitempty"`
+	RegionIDs []string `json:"region_id,omitempty"`
 	common.PaginationRequest
 }
 
@@ -74,27 +82,32 @@ type GroupRef struct {
 }
 
 type Phone struct {
-	ID                       string      `json:"id"`
-	Name                     string      `json:"name"`
-	Status                   int         `json:"status"`
-	ADB                      string      `json:"adb"`
-	ADBPassword              string      `json:"adb_password"`
-	ADBStatus                int         `json:"adb_status"`
-	HTTPStatus               common.Text `json:"http_status"`
-	Group                    []GroupRef  `json:"group"`
-	Remark                   string      `json:"remark"`
-	CreatedAt                string      `json:"created_at"`
-	ExpiredAt                string      `json:"expired_at"`
-	IP                       string      `json:"ip"`
-	Area                     string      `json:"area"`
-	Region                   string      `json:"region"`
-	OS                       string      `json:"os"`
-	Size                     string      `json:"size"`
-	AndroidVersionConfigured bool        `json:"android_version_configured"`
-	ConvertVersionTimes      int         `json:"convert_version_times"`
-	FreeNewMockTimes         int         `json:"free_new_mock_times"`
-	PaidNewMockTimes         int         `json:"paid_new_mock_times"`
-	NewMockTimes             int         `json:"new_mock_times"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// Status is 0 (unconfigured), 1 (on), 2 (off), 3 (expired), 4 (renewal overdue), 10 (powering
+	// on), 11 (configuring), or 12 (configuration failed).
+	Status      int    `json:"status"`
+	ADB         string `json:"adb"`
+	ADBPassword string `json:"adb_password"`
+	// ADBStatus is 0 for disabled or 1 for enabled.
+	ADBStatus int `json:"adb_status"`
+	// HTTPStatus is "0" for disabled or "1" for enabled; numeric JSON is accepted too.
+	HTTPStatus common.Text `json:"http_status"`
+	Group      []GroupRef  `json:"group"`
+	Remark     string      `json:"remark"`
+	CreatedAt  string      `json:"created_at"`
+	ExpiredAt  string      `json:"expired_at"`
+	IP         string      `json:"ip"`
+	Area       string      `json:"area"`
+	Region     string      `json:"region"`
+	// Display name, e.g. Android 12; not a purchase OS code.
+	OS                       string `json:"os"`
+	Size                     string `json:"size"`
+	AndroidVersionConfigured bool   `json:"android_version_configured"`
+	ConvertVersionTimes      int    `json:"convert_version_times"`
+	FreeNewMockTimes         int    `json:"free_new_mock_times"`
+	PaidNewMockTimes         int    `json:"paid_new_mock_times"`
+	NewMockTimes             int    `json:"new_mock_times"`
 }
 
 type ListResponse struct {
@@ -107,22 +120,24 @@ type StatusRequest struct {
 }
 
 type StatusItem struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Status int    `json:"status"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// Status uses the same lifecycle codes as Phone.Status.
+	Status int `json:"status"`
 }
 
 type StatusResponse struct {
 	List []StatusItem `json:"list"`
 }
 
-// InfoRequest follows the EN docs, which name the field image_ids (the CN docs use image_id).
+// InfoRequest uses image_id from both request examples, despite the EN table's image_ids.
 type InfoRequest struct {
-	ImageID string `json:"image_ids"`
+	ImageID string `json:"image_id"`
 }
 
 type ProxySettings struct {
-	ID      string `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
+	// DNS is 1 for enabled or 2 for disabled.
 	DNS     int    `json:"dns,omitempty"`
 	IP      string `json:"ip,omitempty"`
 	Country string `json:"country,omitempty"`
@@ -132,18 +147,21 @@ type ProxySettings struct {
 }
 
 type GPSSettings struct {
+	// Type is 1 for simulation based on proxy IP or 2 for custom coordinates.
 	Type      int     `json:"type,omitempty"`
 	Longitude float64 `json:"longitude,omitempty"`
 	Latitude  float64 `json:"latitude,omitempty"`
 }
 
 type LocaleSettings struct {
+	// Type is 1 for simulation based on proxy IP or 2 for custom values.
 	Type     int    `json:"type,omitempty"`
 	Timezone string `json:"timezone,omitempty"`
 	Language string `json:"language,omitempty"`
 }
 
 type SIMSettings struct {
+	// Status is 1 for enabled or 2 for disabled.
 	Status   int    `json:"status,omitempty"`
 	Country  string `json:"country,omitempty"`
 	MSISDN   string `json:"msisdn,omitempty"`
@@ -161,6 +179,7 @@ type BluetoothSettings struct {
 }
 
 type WiFiSettings struct {
+	// Status is 1 for enabled or 2 for disabled.
 	Status int    `json:"status,omitempty"`
 	Name   string `json:"name,omitempty"`
 	MAC    string `json:"mac,omitempty"`
@@ -197,70 +216,92 @@ type Detail struct {
 	Device      DeviceSettings    `json:"device"`
 }
 
+// UpdateRequest accepts at most 20 phones.
 type UpdateRequest struct {
 	Images []UpdateItem `json:"images"`
 }
 
+// UpdateItem leaves nil fields unchanged; common.Ptr("") sends an empty string.
 type UpdateItem struct {
-	ImageID   string             `json:"image_id"`
-	Name      string             `json:"name,omitempty"`
-	DPIName   string             `json:"dpi_name,omitempty"`
-	Remark    string             `json:"remark,omitempty"`
-	Proxy     *ProxyUpdate       `json:"proxy,omitempty"`
-	GPS       *GPSUpdate         `json:"gps,omitempty"`
-	Locale    *LocaleUpdate      `json:"locale,omitempty"`
-	SIM       *SIMUpdate         `json:"sim,omitempty"`
-	Bluetooth *BluetoothSettings `json:"bluetooth,omitempty"`
-	WiFi      *WiFiSettings      `json:"wifi,omitempty"`
-	Device    *DeviceUpdate      `json:"device,omitempty"`
-	Station   *StationUpdate     `json:"station,omitempty"`
+	ImageID   string           `json:"image_id"`
+	Name      *string          `json:"name,omitempty"`
+	DPIName   *string          `json:"dpi_name,omitempty"`
+	Remark    *string          `json:"remark,omitempty"`
+	Proxy     *ProxyUpdate     `json:"proxy,omitempty"`
+	GPS       *GPSUpdate       `json:"gps,omitempty"`
+	Locale    *LocaleUpdate    `json:"locale,omitempty"`
+	SIM       *SIMUpdate       `json:"sim,omitempty"`
+	Bluetooth *BluetoothUpdate `json:"bluetooth,omitempty"`
+	WiFi      *WiFiUpdate      `json:"wifi,omitempty"`
+	Device    *DeviceUpdate    `json:"device,omitempty"`
+	Station   *StationUpdate   `json:"station,omitempty"`
 }
 
 type ProxyUpdate struct {
-	ID  string `json:"id,omitempty"`
-	DNS int    `json:"dns,omitempty"`
+	ID *string `json:"id,omitempty"`
+	// DNS is 1 for enabled or 2 for disabled; zero is omitted.
+	DNS int `json:"dns,omitempty"`
 }
 
 type GPSUpdate struct {
+	// 1: proxy IP; 2: custom. Required, including when coordinates are zero.
 	Type      int      `json:"type"`
 	Longitude *float64 `json:"longitude,omitempty"`
 	Latitude  *float64 `json:"latitude,omitempty"`
 }
 
 type LocaleUpdate struct {
-	Type     int    `json:"type,omitempty"`
-	Timezone string `json:"timezone,omitempty"`
-	Language string `json:"language,omitempty"`
+	// Type is 1 for simulation based on proxy IP or 2 for custom values; zero is omitted.
+	Type int `json:"type,omitempty"`
+	// Timezone is an identifier from Client.Timezones; ignored for Type 1.
+	Timezone *string `json:"timezone,omitempty"`
+	// Language is an identifier from Client.Languages; ignored for Type 1.
+	Language *string `json:"language,omitempty"`
 }
 
 type SIMUpdate struct {
-	Status   int    `json:"status,omitempty"`
-	NumberID string `json:"number_id,omitempty"`
-	Country  string `json:"country,omitempty"`
-	MSISDN   string `json:"msisdn,omitempty"`
-	Operator string `json:"operator,omitempty"`
-	MCC      string `json:"mcc,omitempty"`
-	MNC      string `json:"mnc,omitempty"`
-	MSIN     string `json:"msin,omitempty"`
-	ICCID    string `json:"iccid,omitempty"`
-	IMSI     string `json:"imsi,omitempty"`
+	// Status is 1 for enabled or 2 for disabled; zero is omitted.
+	Status   int     `json:"status,omitempty"`
+	NumberID *string `json:"number_id,omitempty"`
+	Country  *string `json:"country,omitempty"`
+	MSISDN   *string `json:"msisdn,omitempty"`
+	Operator *string `json:"operator,omitempty"`
+	MCC      *string `json:"mcc,omitempty"`
+	MNC      *string `json:"mnc,omitempty"`
+	MSIN     *string `json:"msin,omitempty"`
+	ICCID    *string `json:"iccid,omitempty"`
+	IMSI     *string `json:"imsi,omitempty"`
+}
+
+type BluetoothUpdate struct {
+	Name    *string `json:"name,omitempty"`
+	Address *string `json:"address,omitempty"`
+}
+
+type WiFiUpdate struct {
+	// Status is 1 for enabled or 2 for disabled; zero is omitted.
+	Status int     `json:"status,omitempty"`
+	Name   *string `json:"name,omitempty"`
+	MAC    *string `json:"mac,omitempty"`
+	BSSID  *string `json:"bssid,omitempty"`
 }
 
 type DeviceUpdate struct {
-	IMEI      string `json:"imei,omitempty"`
-	SerialNo  string `json:"serialno,omitempty"`
-	AndroidID string `json:"android_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	GSFID     string `json:"gsf_id,omitempty"`
-	GAID      string `json:"gaid,omitempty"`
+	IMEI      *string `json:"imei,omitempty"`
+	SerialNo  *string `json:"serialno,omitempty"`
+	AndroidID *string `json:"android_id,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	GSFID     *string `json:"gsf_id,omitempty"`
+	GAID      *string `json:"gaid,omitempty"`
 }
 
 type StationUpdate struct {
-	LAC int `json:"lac,omitempty"`
-	CID int `json:"cid,omitempty"`
+	LAC *int `json:"lac,omitempty"`
+	CID *int `json:"cid,omitempty"`
 }
 
 type ModelListRequest struct {
+	// OS is 1 (Android 10), 2 (12A), 3 (11), 4 (15), 5 (12B), or 10 (15 Pro).
 	OS int `json:"os"`
 }
 
@@ -270,9 +311,12 @@ type ModelInfo struct {
 
 type ModelListResponse map[string]map[string]ModelInfo
 
+// BatchRootRequest accepts at most 20 phones.
 type BatchRootRequest struct {
 	ImageIDs []string `json:"image_ids"`
-	Status   int      `json:"status"`
+	// Status is 1 (enable all), 2 (disable all), 3 (enable packages), or 4 (disable packages).
+	Status int `json:"status"`
+	// Required for Status 3 or 4. EN uses pkgs; CN uses packages.
 	Packages []string `json:"pkgs,omitempty"`
 }
 
@@ -282,15 +326,19 @@ type CommandRequest struct {
 	Command  string   `json:"command"`
 }
 
+// CommandResult.Success can be false even when err is nil.
 type CommandResult struct {
+	// Success reports execution success independently of the HTTP/envelope status.
 	Success bool   `json:"success"`
 	Content string `json:"content"`
 	Message string `json:"message"`
 }
 
+// SetADBIPWhitelistRequest allows at most 10 IP addresses in the resulting whitelist.
 type SetADBIPWhitelistRequest struct {
-	IPs    []string `json:"ips"`
-	Append bool     `json:"append,omitempty"`
+	IPs []string `json:"ips"`
+	// Append is false to replace the whitelist or true to add to it.
+	Append bool `json:"append,omitempty"`
 }
 
 type UpdateSharePasswordRequest struct {
@@ -346,17 +394,21 @@ type ResolutionListResponse struct {
 }
 
 type PurchaseRequest struct {
-	OS            string `json:"os,omitempty"`
-	Quantity      int    `json:"quantity"`
-	Duration      string `json:"duration,omitempty"`
-	CouponCode    string `json:"coupon_code,omitempty"`
-	RenewalStatus *int   `json:"renewal_status,omitempty"`
+	// OS: "10", "12A", "11", "15", "12B", or "15pro". Models uses integer codes.
+	OS       string `json:"os,omitempty"`
+	Quantity int    `json:"quantity"`
+	// Duration in days; defaults to 30 when omitted.
+	Duration   string `json:"duration,omitempty"`
+	CouponCode string `json:"coupon_code,omitempty"`
+	// RenewalStatus is 0 for off or 1 for on; nil uses the server default of 1.
+	RenewalStatus *int `json:"renewal_status,omitempty"`
 }
 
 type RenewRequest struct {
-	ImageIDs   []string `json:"image_ids"`
-	Duration   string   `json:"duration,omitempty"`
-	CouponCode string   `json:"coupon_code,omitempty"`
+	ImageIDs []string `json:"image_ids"`
+	// Duration in days; defaults to 30 when omitted.
+	Duration   string `json:"duration,omitempty"`
+	CouponCode string `json:"coupon_code,omitempty"`
 }
 
 type ShareRequest struct {
@@ -369,10 +421,14 @@ type ShareItem struct {
 }
 
 type ShareConfig struct {
-	ShareStatus    int    `json:"share_status,omitempty"`
-	SharePhoneType int    `json:"share_phone_type,omitempty"`
-	ShareCode      string `json:"share_code,omitempty"`
-	ShareAuth      []int  `json:"share_auth,omitempty"`
+	// 1: on; 2: off (default).
+	ShareStatus int `json:"share_status,omitempty"`
+	// SharePhoneType is 1 (prefer subscription), 2 (subscription), or 3 (temporary).
+	SharePhoneType int `json:"share_phone_type,omitempty"`
+	// 8–20 characters, with uppercase/lowercase letters and digits.
+	ShareCode string `json:"share_code,omitempty"`
+	// 1: reset device; 2: factory reset; 3: edit; 4: cloud drive; 5: commands.
+	ShareAuth []int `json:"share_auth,omitempty"`
 }
 
 type ShareResponse map[string]string
@@ -382,18 +438,21 @@ type InitProxyRequest struct {
 }
 
 type InitProxyItem struct {
-	ImageID       string      `json:"image_id"`
-	OS            string      `json:"os,omitempty"`
-	Name          string      `json:"name,omitempty"`
+	ImageID string `json:"image_id"`
+	// Same codes as PurchaseRequest.OS; required for an unconfigured Android version.
+	OS   string `json:"os,omitempty"`
+	Name string `json:"name,omitempty"`
+	// IPScanChannel is required and is ip2location or ipapi.
 	IPScanChannel string      `json:"ip_scan_channel"`
 	Proxy         ProxyConfig `json:"proxy"`
 	DPIName       string      `json:"dpi_name,omitempty"`
-	NetworkMode   int         `json:"network_mode,omitempty"`
-	Brand         string      `json:"brand,omitempty"`
-	Model         string      `json:"model,omitempty"`
-	Location      *Location   `json:"location,omitempty"`
-	SIM           *SIMConfig  `json:"sim,omitempty"`
-	Locale        *InitLocale `json:"locale,omitempty"`
+	// NetworkMode is 1 for Wi-Fi or 2 for mobile; Android 10, 11, and 12B only support Wi-Fi.
+	NetworkMode int         `json:"network_mode,omitempty"`
+	Brand       string      `json:"brand,omitempty"`
+	Model       string      `json:"model,omitempty"`
+	Location    *Location   `json:"location,omitempty"`
+	SIM         *SIMConfig  `json:"sim,omitempty"`
+	Locale      *InitLocale `json:"locale,omitempty"`
 }
 
 type ProxyConfig struct {
@@ -402,6 +461,7 @@ type ProxyConfig struct {
 	Port     int    `json:"port,omitempty"`
 	User     string `json:"user,omitempty"`
 	Password string `json:"password,omitempty"`
+	// Protocol is socks5, http, or https.
 	Protocol string `json:"protocol,omitempty"`
 }
 
@@ -411,8 +471,12 @@ type Location struct {
 }
 
 type SIMConfig struct {
-	Type        int    `json:"type,omitempty"`
-	Country     string `json:"country,omitempty"`
+	// Type is 1 (proxy IP), 2 (custom region), 3 (disabled), 4 (custom number), or 5 (cloud
+	// number); omission defaults to 1.
+	Type int `json:"type,omitempty"`
+	// Country is required for Type 2 and uses ISO 3166-1 alpha-2.
+	Country string `json:"country,omitempty"`
+	// PhoneNumber is required for Type 4 or 5 and includes the leading +.
 	PhoneNumber string `json:"phone_number,omitempty"`
 }
 
@@ -424,7 +488,8 @@ type InitLocale struct {
 
 type SwitchRequest struct {
 	ImageIDs []string `json:"image_ids"`
-	Status   int      `json:"status"`
+	// Status is 0 for disabled or 1 for enabled.
+	Status int `json:"status"`
 }
 
 type TimezoneListRequest struct {
@@ -437,29 +502,37 @@ type Option struct {
 }
 
 type ResetDeviceRequest struct {
-	ImageID     string        `json:"image_id"`
-	ProxyID     string        `json:"proxy_id,omitempty"`
-	DNS         int           `json:"dns,omitempty"`
-	Model       string        `json:"model,omitempty"`
-	GPS         *GPSUpdate    `json:"gps,omitempty"`
-	Locale      *LocaleUpdate `json:"locale,omitempty"`
-	SIM         *SIMConfig    `json:"sim,omitempty"`
-	DataType    int           `json:"data_type,omitempty"`
-	DPIName     string        `json:"dpi_name,omitempty"`
-	NetworkMode int           `json:"network_mode,omitempty"`
-	KeepGP      *int          `json:"keep_gp,omitempty"`
+	ImageID string `json:"image_id"`
+	ProxyID string `json:"proxy_id,omitempty"`
+	// DNS is 1 for enabled or 2 for disabled; omission defaults to enabled.
+	DNS    int           `json:"dns,omitempty"`
+	Model  string        `json:"model,omitempty"`
+	GPS    *GPSUpdate    `json:"gps,omitempty"`
+	Locale *LocaleUpdate `json:"locale,omitempty"`
+	SIM    *SIMConfig    `json:"sim,omitempty"`
+	// 1: reinstall (default); 2: clear app data; 3: retain app data (CN; EN is ambiguous).
+	DataType int    `json:"data_type,omitempty"`
+	DPIName  string `json:"dpi_name,omitempty"`
+	// NetworkMode is 1 for Wi-Fi or 2 for mobile; Android 10, 11, and 12B only support Wi-Fi.
+	NetworkMode int `json:"network_mode,omitempty"`
+	// KeepGP is 0 to clear Google Play or 1 to keep it; nil defaults to 0.
+	KeepGP *int `json:"keep_gp,omitempty"`
 }
 
 type LiveRequest struct {
 	ImageID string `json:"image_id"`
-	ID      string `json:"id,omitempty"`
-	Status  int    `json:"status,omitempty"`
-	Loop    int    `json:"loop,omitempty"`
+	// MP4 file ID; push to /sdcard/DCIM/Camera before enabling playback.
+	ID string `json:"id,omitempty"`
+	// 1: on; 2: off (default).
+	Status int `json:"status,omitempty"`
+	// 1: repeat (default); 2: no repeat.
+	Loop int `json:"loop,omitempty"`
 }
 
 type ScanRequest struct {
 	ImageID string `json:"image_id"`
-	ID      string `json:"id"`
+	// ID is a cloud drive image file ID; push the file to /sdcard/DCIM/Camera first.
+	ID string `json:"id"`
 }
 
 type ConvertVersionRequest struct {
@@ -468,7 +541,8 @@ type ConvertVersionRequest struct {
 
 type ConvertVersionItem struct {
 	ImageID string `json:"image_id"`
-	OS      string `json:"os"`
+	// Same codes as PurchaseRequest.OS.
+	OS string `json:"os"`
 }
 
 func (c *Client) List(ctx context.Context, req ListRequest) (*ListResponse, error) {
@@ -479,14 +553,17 @@ func (c *Client) List(ctx context.Context, req ListRequest) (*ListResponse, erro
 	return &resp, nil
 }
 
+// PowerOn accepts at most 100 phones. Check Fail, then poll Status for readiness.
 func (c *Client) PowerOn(ctx context.Context, imageIDs []string) (*common.OperationResult, error) {
 	return c.operation(ctx, pathPowerOn, imageIDs)
 }
 
+// PowerOff accepts at most 20 phones.
 func (c *Client) PowerOff(ctx context.Context, imageIDs []string) (*common.OperationResult, error) {
 	return c.operation(ctx, pathPowerOff, imageIDs)
 }
 
+// Restart accepts at most 20 phones.
 func (c *Client) Restart(ctx context.Context, imageIDs []string) (*common.OperationResult, error) {
 	return c.operation(ctx, pathRestart, imageIDs)
 }
@@ -531,6 +608,7 @@ func (c *Client) BatchRoot(ctx context.Context, req BatchRootRequest) (*common.O
 	return &resp, nil
 }
 
+// Command runs a shell command without the adb shell prefix; maximum execution time is 10s.
 func (c *Client) Command(ctx context.Context, imageID, command string) (*CommandResult, error) {
 	var resp CommandResult
 	if err := c.core.Do(ctx, pathCommand, CommandRequest{ImageID: imageID, Command: command}, &resp); err != nil {
@@ -539,6 +617,7 @@ func (c *Client) Command(ctx context.Context, imageID, command string) (*Command
 	return &resp, nil
 }
 
+// CommandBatch runs a command on at most 20 phones; the same limits as Command apply.
 func (c *Client) CommandBatch(ctx context.Context, imageIDs []string, command string) (map[string]CommandResult, error) {
 	resp := map[string]CommandResult{}
 	if err := c.core.Do(ctx, pathCommand, CommandRequest{ImageIDs: imageIDs, Command: command}, &resp); err != nil {
@@ -659,6 +738,7 @@ func (c *Client) Languages(ctx context.Context) ([]Option, error) {
 	return resp, nil
 }
 
+// ResetDevice requires a powered-on phone; DataType controls which data is removed.
 func (c *Client) ResetDevice(ctx context.Context, req ResetDeviceRequest) (*common.MessageResponse, error) {
 	var resp common.MessageResponse
 	if err := c.core.Do(ctx, pathNewPhone, req, &resp); err != nil {
@@ -675,6 +755,7 @@ func (c *Client) Live(ctx context.Context, req LiveRequest) (*common.MessageResp
 	return &resp, nil
 }
 
+// ScanCode requires a file in /sdcard/DCIM/Camera and Android 12A, 15, or 15 Pro.
 func (c *Client) ScanCode(ctx context.Context, imageID, fileID string) (*common.MessageResponse, error) {
 	var resp common.MessageResponse
 	if err := c.core.Do(ctx, pathScan, ScanRequest{ImageID: imageID, ID: fileID}, &resp); err != nil {

@@ -25,6 +25,7 @@ const (
 	DefaultLanguage    = clientcore.DefaultLanguage
 )
 
+// APIError reports HTTP or API failures; inspect it with errors.As.
 type APIError = clientcore.APIError
 
 type config struct {
@@ -36,6 +37,7 @@ type config struct {
 
 type Option func(*config)
 
+// Client shares one HTTP client and per-endpoint limiter across services.
 type Client struct {
 	CloudPhones          *cloudphone.Client
 	CloudNumbers         *cloudnumber.Client
@@ -50,6 +52,8 @@ type Client struct {
 	core *clientcore.Client
 }
 
+// NewClient defaults to the international host, English, a 30s HTTP timeout,
+// and a 1s interval per endpoint. Reuse the client; requests are not retried.
 func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	if strings.TrimSpace(apiKey) == "" {
 		return nil, errors.New("duoplus api key is required")
@@ -90,6 +94,7 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	}, nil
 }
 
+// WithBaseURL requires HTTPS, except for loopback HTTP servers.
 func WithBaseURL(baseURL string) Option {
 	return func(cfg *config) {
 		if strings.TrimSpace(baseURL) != "" {
@@ -98,6 +103,7 @@ func WithBaseURL(baseURL string) Option {
 	}
 }
 
+// WithLanguage sets the Lang header: en, zh, zh-TW, or ru.
 func WithLanguage(lang string) Option {
 	return func(cfg *config) {
 		if strings.TrimSpace(lang) != "" {
@@ -106,8 +112,8 @@ func WithLanguage(lang string) Option {
 	}
 }
 
-// WithHTTPClient sets the HTTP client used for API calls. The client is copied
-// and redirects are always refused so the API key never leaves the API host.
+// WithHTTPClient copies the client and disables redirects. Transport and Jar remain shared.
+// Use a context deadline to include rate-limit waits and storage uploads.
 func WithHTTPClient(httpClient *http.Client) Option {
 	return func(cfg *config) {
 		if httpClient != nil {
@@ -116,6 +122,7 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	}
 }
 
+// WithMinInterval sets the per-endpoint interval for this client; non-positive values are ignored.
 func WithMinInterval(interval time.Duration) Option {
 	return func(cfg *config) {
 		if interval > 0 {

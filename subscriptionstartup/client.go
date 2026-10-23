@@ -23,29 +23,37 @@ func New(core *clientcore.Client) *Client {
 	return &Client{core: core}
 }
 
+// ListRequest allows at most 100 items per page.
 type ListRequest struct {
-	ID            string `json:"id,omitempty"`
-	Name          string `json:"name,omitempty"`
-	Remark        string `json:"remark,omitempty"`
-	RenewalStatus *int   `json:"renewal_status,omitempty"`
-	FreeStatus    *int   `json:"free_status,omitempty"`
-	SortBy        string `json:"sort_by,omitempty"`
-	Order         string `json:"order,omitempty"`
+	ID     string `json:"id,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Remark string `json:"remark,omitempty"`
+	// RenewalStatus is 0 for off or 1 for on; nil omits the filter.
+	RenewalStatus *int `json:"renewal_status,omitempty"`
+	// 0: unavailable; 1: available; nil: no filter (CN).
+	FreeStatus *int `json:"free_status,omitempty"`
+	// SortBy is name, created_at, or expired_at.
+	SortBy string `json:"sort_by,omitempty"`
+	// Order is asc or desc.
+	Order string `json:"order,omitempty"`
 	common.PaginationRequest
 }
 
 type Item struct {
-	ID            string `json:"id"`
-	Name          string `json:"name"`
-	CPU           string `json:"cpu"`
-	RAM           string `json:"ram"`
-	ROM           string `json:"rom"`
-	RenewalStatus int    `json:"renewal_status"`
-	FreeStatus    int    `json:"free_status"`
-	Remark        string `json:"remark"`
-	ExpiredAt     string `json:"expired_at"`
-	CreatedAt     string `json:"created_at"`
-	NeedRenewal   bool   `json:"need_renewal"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	CPU  string `json:"cpu"`
+	RAM  string `json:"ram"`
+	ROM  string `json:"rom"`
+	// RenewalStatus is 0 for disabled or 1 for enabled.
+	RenewalStatus int `json:"renewal_status"`
+	// FreeStatus is 0 for unavailable or 1 for available.
+	FreeStatus int    `json:"free_status"`
+	Remark     string `json:"remark"`
+	// ExpiredAt and CreatedAt are Unix timestamps in seconds encoded as strings.
+	ExpiredAt   string `json:"expired_at"`
+	CreatedAt   string `json:"created_at"`
+	NeedRenewal bool   `json:"need_renewal"`
 }
 
 type ListResponse struct {
@@ -54,21 +62,25 @@ type ListResponse struct {
 }
 
 type PurchaseRequest struct {
-	Duration      string `json:"duration,omitempty"`
-	Quantity      int    `json:"quantity"`
-	CouponCode    string `json:"coupon_code,omitempty"`
-	RenewalStatus *int   `json:"renewal_status,omitempty"`
+	// Duration in days; defaults to 30 when omitted.
+	Duration   string `json:"duration,omitempty"`
+	Quantity   int    `json:"quantity"`
+	CouponCode string `json:"coupon_code,omitempty"`
+	// RenewalStatus is 0 for off or 1 for on; nil uses the server default of 1.
+	RenewalStatus *int `json:"renewal_status,omitempty"`
 }
 
 type RenewRequest struct {
-	PhoneIDs   []string `json:"phone_ids"`
-	Duration   string   `json:"duration,omitempty"`
-	CouponCode string   `json:"coupon_code,omitempty"`
+	PhoneIDs []string `json:"phone_ids"`
+	// Duration in days; defaults to 30 when omitted.
+	Duration   string `json:"duration,omitempty"`
+	CouponCode string `json:"coupon_code,omitempty"`
 }
 
 type AutoRenewalRequest struct {
 	PhoneIDs []string `json:"phone_ids"`
-	Status   int      `json:"status"`
+	// Status is 0 for disabled or 1 for enabled.
+	Status int `json:"status"`
 }
 
 func (c *Client) List(ctx context.Context, req ListRequest) (*ListResponse, error) {

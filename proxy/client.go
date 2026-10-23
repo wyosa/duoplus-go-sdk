@@ -26,7 +26,10 @@ func New(core *clientcore.Client) *Client {
 	return &Client{core: core}
 }
 
+// ListRequest allows at most 100 items per page.
 type ListRequest struct {
+	// 1: connected; 2: connection failed.
+	Status []int `json:"status,omitempty"`
 	common.PaginationRequest
 }
 
@@ -46,12 +49,16 @@ type ListResponse struct {
 	common.Pagination
 }
 
+// AddRequest accepts at most 20 proxies.
 type AddRequest struct {
-	ProxyList     []Input `json:"proxy_list"`
-	IPScanChannel string  `json:"ip_scan_channel,omitempty"`
+	ProxyList []Input `json:"proxy_list"`
+	// IPScanChannel defaults to ip2location when omitted.
+	IPScanChannel string `json:"ip_scan_channel,omitempty"`
 }
 
+// Input does not support IPv6 proxies.
 type Input struct {
+	// Protocol is socks5, http, or https.
 	Protocol string `json:"protocol"`
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
@@ -70,6 +77,7 @@ type AddFailure struct {
 	Message string `json:"message"`
 }
 
+// AddResponse can contain Fail entries even when err is nil.
 type AddResponse struct {
 	Success []AddSuccess `json:"success"`
 	Fail    []AddFailure `json:"fail"`
@@ -79,18 +87,20 @@ type IDsRequest struct {
 	IDs []string `json:"ids"`
 }
 
+// CheckRequest accepts a ProxyID or Host and Port.
 type CheckRequest struct {
-	ProxyID       string `json:"proxy_id,omitempty"`
-	Protocol      string `json:"protocol,omitempty"`
-	Host          string `json:"host,omitempty"`
-	Port          int    `json:"port,omitempty"`
-	User          string `json:"user,omitempty"`
-	Password      string `json:"password,omitempty"`
+	ProxyID string `json:"proxy_id,omitempty"`
+	// Protocol is socks5, http, or https; omission defaults to socks5.
+	Protocol string `json:"protocol,omitempty"`
+	Host     string `json:"host,omitempty"`
+	Port     int    `json:"port,omitempty"`
+	User     string `json:"user,omitempty"`
+	Password string `json:"password,omitempty"`
+	// IPScanChannel defaults to ip2location when omitted.
 	IPScanChannel string `json:"ip_scan_channel,omitempty"`
 }
 
-// CheckResponse is returned with code 200 even when the check fails;
-// inspect Success and Tips.
+// CheckResponse.Success can be false even when err is nil; see Tips.
 type CheckResponse struct {
 	Success   bool   `json:"success"`
 	IP        string `json:"ip"`
@@ -107,20 +117,23 @@ type CheckResponse struct {
 
 type AutoRenewalRequest struct {
 	ProxyIDs []string `json:"proxy_ids"`
-	Type     int      `json:"type"`
+	// Type is 0 for disabled or 1 for enabled.
+	Type int `json:"type"`
 }
 
+// UpdateRequest leaves nil fields unchanged; common.Ptr("") clears a string.
 type UpdateRequest struct {
-	ID            string `json:"id"`
-	Protocol      string `json:"protocol,omitempty"`
-	Host          string `json:"host,omitempty"`
-	Port          int    `json:"port,omitempty"`
-	User          string `json:"user,omitempty"`
-	Password      string `json:"password,omitempty"`
-	Name          string `json:"name,omitempty"`
-	IPScanChannel string `json:"ip_scan_channel,omitempty"`
-	RefreshURL    string `json:"refresh_url,omitempty"`
-	ProxyURL      string `json:"proxy_url,omitempty"`
+	ID string `json:"id"`
+	// Protocol is socks5, http, or https; nil leaves it unchanged.
+	Protocol      *string `json:"protocol,omitempty"`
+	Host          *string `json:"host,omitempty"`
+	Port          int     `json:"port,omitempty"`
+	User          *string `json:"user,omitempty"`
+	Password      *string `json:"password,omitempty"`
+	Name          *string `json:"name,omitempty"`
+	IPScanChannel *string `json:"ip_scan_channel,omitempty"`
+	RefreshURL    *string `json:"refresh_url,omitempty"`
+	ProxyURL      *string `json:"proxy_url,omitempty"`
 }
 
 type UpdateResponse struct {

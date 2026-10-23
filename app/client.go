@@ -25,16 +25,19 @@ func New(core *clientcore.Client) *Client {
 	return &Client{core: core}
 }
 
+// ListRequest allows at most 100 items per page.
 type ListRequest struct {
 	common.PaginationRequest
 }
 
 type Version struct {
+	// ID is opaque; preserve any #0 or #1 suffix.
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
 type Item struct {
+	// ID is opaque; preserve any #0 or #1 suffix.
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Pkg         string    `json:"pkg"`
@@ -46,10 +49,12 @@ type ListResponse struct {
 	common.Pagination
 }
 
+// InstallRequest accepts at most 20 phones.
 type InstallRequest struct {
-	ImageIDs     []string `json:"image_ids"`
-	AppID        string   `json:"app_id"`
-	AppVersionID string   `json:"app_version_id,omitempty"`
+	ImageIDs []string `json:"image_ids"`
+	AppID    string   `json:"app_id"`
+	// AppVersionID defaults to the first ranked version when omitted.
+	AppVersionID string `json:"app_version_id,omitempty"`
 }
 
 type InstalledRequest struct {
@@ -57,9 +62,11 @@ type InstalledRequest struct {
 }
 
 type InstalledResponse struct {
+	// List contains Android package names, such as com.example.app.
 	List []string `json:"list"`
 }
 
+// PackageOperationRequest accepts at most 20 phones.
 type PackageOperationRequest struct {
 	ImageIDs []string `json:"image_ids"`
 	Pkg      string   `json:"pkg"`

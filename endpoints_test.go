@@ -72,6 +72,51 @@ func TestRequestBodies(t *testing.T) {
 		data string
 	}{
 		{
+			name: "cloud phone update clears optional fields",
+			call: func(c *Client) error {
+				_, err := c.CloudPhones.Update(ctx, cloudphone.UpdateRequest{Images: []cloudphone.UpdateItem{{
+					ImageID: "p1", Remark: common.Ptr(""),
+					Proxy:     &cloudphone.ProxyUpdate{ID: common.Ptr("")},
+					Locale:    &cloudphone.LocaleUpdate{Language: common.Ptr("")},
+					SIM:       &cloudphone.SIMUpdate{NumberID: common.Ptr("")},
+					Bluetooth: &cloudphone.BluetoothUpdate{Name: common.Ptr("")},
+					WiFi:      &cloudphone.WiFiUpdate{Name: common.Ptr("")},
+					Device:    &cloudphone.DeviceUpdate{Name: common.Ptr("")},
+					Station:   &cloudphone.StationUpdate{LAC: common.Ptr(0), CID: common.Ptr(0)},
+				}}})
+				return err
+			},
+			path: "/api/v1/cloudPhone/update",
+			want: `{"images":[{"image_id":"p1","remark":"","proxy":{"id":""},"locale":{"language":""},"sim":{"number_id":""},"bluetooth":{"name":""},"wifi":{"name":""},"device":{"name":""},"station":{"lac":0,"cid":0}}]}`,
+		},
+		{
+			name: "cloud phone update omits unchanged fields",
+			call: func(c *Client) error {
+				_, err := c.CloudPhones.Update(ctx, cloudphone.UpdateRequest{Images: []cloudphone.UpdateItem{{ImageID: "p1", Name: common.Ptr("Renamed")}}})
+				return err
+			},
+			path: "/api/v1/cloudPhone/update",
+			want: `{"images":[{"image_id":"p1","name":"Renamed"}]}`,
+		},
+		{
+			name: "proxy update clears credentials and refresh URL",
+			call: func(c *Client) error {
+				_, err := c.Proxies.Update(ctx, proxy.UpdateRequest{ID: "x", User: common.Ptr(""), Password: common.Ptr(""), RefreshURL: common.Ptr("")})
+				return err
+			},
+			path: "/api/v1/proxy/update",
+			want: `{"id":"x","user":"","password":"","refresh_url":""}`,
+		},
+		{
+			name: "plan update clears remark without changing name",
+			call: func(c *Client) error {
+				_, err := c.Automation.SavePlan(ctx, automation.SavePlanRequest{ID: "plan1", Remark: common.Ptr(""), Images: []automation.TaskImage{{ImageID: "p1"}}})
+				return err
+			},
+			path: "/api/v1/automation/savePlan",
+			want: `{"id":"plan1","remark":"","images":[{"image_id":"p1"}]}`,
+		},
+		{
 			name: "cloud phone purchase without auto-renewal",
 			call: func(c *Client) error {
 				_, err := c.CloudPhones.Purchase(ctx, cloudphone.PurchaseRequest{Quantity: 1, RenewalStatus: common.Ptr(0)})
@@ -104,8 +149,8 @@ func TestRequestBodies(t *testing.T) {
 				_, err := c.CloudPhones.Update(ctx, cloudphone.UpdateRequest{Images: []cloudphone.UpdateItem{{
 					ImageID: "p1",
 					GPS:     &cloudphone.GPSUpdate{Type: 2, Longitude: common.Ptr(0.0), Latitude: common.Ptr(51.5)},
-					SIM:     &cloudphone.SIMUpdate{NumberID: "n1"},
-					Station: &cloudphone.StationUpdate{LAC: 55, CID: 18},
+					SIM:     &cloudphone.SIMUpdate{NumberID: common.Ptr("n1")},
+					Station: &cloudphone.StationUpdate{LAC: common.Ptr(55), CID: common.Ptr(18)},
 				}}})
 				return err
 			},
@@ -151,20 +196,20 @@ func TestRequestBodies(t *testing.T) {
 		{
 			name: "proxy update protocol",
 			call: func(c *Client) error {
-				_, err := c.Proxies.Update(ctx, proxy.UpdateRequest{ID: "x", Protocol: "http"})
+				_, err := c.Proxies.Update(ctx, proxy.UpdateRequest{ID: "x", Protocol: common.Ptr("http")})
 				return err
 			},
 			path: "/api/v1/proxy/update",
 			want: `{"id":"x","protocol":"http"}`,
 		},
 		{
-			name: "cloud phone info uses EN field name",
+			name: "cloud phone info follows both request examples",
 			call: func(c *Client) error {
 				_, err := c.CloudPhones.Info(ctx, "p1")
 				return err
 			},
 			path: "/api/v1/cloudPhone/info",
-			want: `{"image_ids":"p1"}`,
+			want: `{"image_id":"p1"}`,
 		},
 		{
 			name: "batch root uses EN field name",

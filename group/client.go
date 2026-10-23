@@ -24,7 +24,9 @@ func New(core *clientcore.Client) *Client {
 	return &Client{core: core}
 }
 
+// ListRequest uses a fixed page size of 200.
 type ListRequest struct {
+	// Page is one-based; zero omits it and selects the first page.
 	Page int `json:"page,omitempty"`
 }
 
@@ -41,27 +43,36 @@ type ListResponse struct {
 }
 
 type GroupImagesRequest struct {
-	ID       string   `json:"id"`
+	ID string `json:"id"`
+	// ImageIDs contains at most 100 cloud phone IDs.
 	ImageIDs []string `json:"image_ids"`
 }
 
 type CreateItem struct {
-	Name   string `json:"name"`
-	Sort   *int   `json:"sort,omitempty"`
+	// Name must contain 2 to 30 characters.
+	Name string `json:"name"`
+	// Sort orders groups descending and must not exceed 9999; use common.Ptr(0) for explicit zero.
+	Sort *int `json:"sort,omitempty"`
+	// Remark may contain at most 200 characters.
 	Remark string `json:"remark,omitempty"`
 }
 
 type UpdateItem struct {
-	ID     string  `json:"id"`
-	Name   string  `json:"name"`
-	Sort   *int    `json:"sort,omitempty"`
+	ID string `json:"id"`
+	// Name is required and must contain 2 to 30 characters.
+	Name string `json:"name"`
+	// Sort orders groups descending and must not exceed 9999; nil omits it.
+	Sort *int `json:"sort,omitempty"`
+	// Remark may contain at most 200 characters; common.Ptr("") clears it.
 	Remark *string `json:"remark,omitempty"`
 }
 
+// CreateRequest accepts at most 100 groups.
 type CreateRequest struct {
 	List []CreateItem `json:"list"`
 }
 
+// UpdateRequest accepts at most 100 groups.
 type UpdateRequest struct {
 	List []UpdateItem `json:"list"`
 }
@@ -80,11 +91,13 @@ type MutationFailure struct {
 	Message string `json:"message"`
 }
 
+// MutationResponse can contain Fail entries even when err is nil.
 type MutationResponse struct {
 	Success []MutationSuccess `json:"success"`
 	Fail    []MutationFailure `json:"fail"`
 }
 
+// IDsRequest accepts at most 100 groups.
 type IDsRequest struct {
 	IDs []string `json:"ids"`
 }

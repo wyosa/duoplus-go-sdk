@@ -1,0 +1,3125 @@
+[
+  {
+    "name": "CloudPhones.List",
+    "operation": "CloudPhones.List",
+    "path": "/api/v1/cloudPhone/list",
+    "source": "https://help.duoplus.net/docs/cloud-phone-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 10,
+      "link_status": [
+        "0"
+      ],
+      "tag_ids": [
+        "tag-1"
+      ],
+      "group_id": "group-1",
+      "share_status": [
+        "1"
+      ],
+      "region_id": [
+        "region-1"
+      ],
+      "adb_status": [
+        "1"
+      ],
+      "sort_by": "created_at",
+      "order": "desc",
+      "image_id": [
+        "phone-1"
+      ],
+      "ips": [
+        "192.0.2.1"
+      ],
+      "name": "Demo",
+      "start_phone_type": [
+        "1"
+      ],
+      "renewal_status": [
+        "0"
+      ],
+      "remark": "test",
+      "user_ids": [
+        "user-1"
+      ],
+      "proxy_id": "proxy-1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "xx",
+            "name": "xx",
+            "status": 1,
+            "os": "Android 12",
+            "size": "30.08G",
+            "created_at": "2024-04-10 19:14:56",
+            "expired_at": "2024-06-10 19:14:56",
+            "ip": "xx.xx.xx.xx",
+            "area": "xx",
+            "remark": "xx",
+            "adb_status": 0,
+            "adb": "127.0.0.1:20100",
+            "adb_password": "",
+            "group": [
+              {
+                "id": "xxxx",
+                "name": "xxxx"
+              },
+              {
+                "id": "xxxx",
+                "name": "xxxx"
+              }
+            ],
+            "http_status": 0,
+            "region": "xxxx",
+            "convert_version_times": 1,
+            "free_new_mock_times": 10,
+            "paid_new_mock_times": 40,
+            "new_mock_times": 50,
+            "android_version_configured": true
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    },
+    "result": {
+      "list": [
+        {
+          "id": "xx",
+          "name": "xx",
+          "status": 1,
+          "os": "Android 12",
+          "size": "30.08G",
+          "created_at": "2024-04-10 19:14:56",
+          "expired_at": "2024-06-10 19:14:56",
+          "ip": "xx.xx.xx.xx",
+          "area": "xx",
+          "remark": "xx",
+          "adb_status": 0,
+          "adb": "127.0.0.1:20100",
+          "adb_password": "",
+          "group": [
+            {
+              "id": "xxxx",
+              "name": "xxxx"
+            },
+            {
+              "id": "xxxx",
+              "name": "xxxx"
+            }
+          ],
+          "http_status": "0",
+          "region": "xxxx",
+          "convert_version_times": 1,
+          "free_new_mock_times": 10,
+          "paid_new_mock_times": 40,
+          "new_mock_times": 50,
+          "android_version_configured": true
+        }
+      ],
+      "page": 1,
+      "pagesize": 10,
+      "total": 1,
+      "total_page": 1
+    }
+  },
+  {
+    "name": "CloudPhones.PowerOn",
+    "operation": "CloudPhones.PowerOn",
+    "path": "/api/v1/cloudPhone/powerOn",
+    "source": "https://help.duoplus.net/docs/batch-power-on",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1",
+        "phone-2"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "xx"
+        ],
+        "fail": [
+          "xx"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.PowerOff",
+    "operation": "CloudPhones.PowerOff",
+    "path": "/api/v1/cloudPhone/powerOff",
+    "source": "https://help.duoplus.net/docs/batch-power-off",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1",
+        "phone-2"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "xx"
+        ],
+        "fail": [
+          "xx"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Restart",
+    "operation": "CloudPhones.Restart",
+    "path": "/api/v1/cloudPhone/restart",
+    "source": "https://help.duoplus.net/docs/Batch-Restart",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1",
+        "phone-2"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "xx"
+        ],
+        "fail": [
+          "xx"
+        ],
+        "fail_reason": {
+          "xx": "restart error"
+        }
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Status",
+    "operation": "CloudPhones.Status",
+    "path": "/api/v1/cloudPhone/status",
+    "source": "https://help.duoplus.net/docs/cloud-phone-status",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "xx",
+            "name": "xx",
+            "status": 1
+          }
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Info",
+    "operation": "CloudPhones.Info",
+    "path": "/api/v1/cloudPhone/info",
+    "source": "https://help.duoplus.net/docs/Details",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_id": "phone-1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "id": "xx",
+        "name": "xx",
+        "remark": "",
+        "os": "Andriod 12",
+        "adb_status": 0,
+        "adb": "",
+        "adb_password": "",
+        "group": [
+          {
+            "id": "xxxx",
+            "name": "xxxx"
+          },
+          {
+            "id": "xxxx",
+            "name": "xxxx"
+          }
+        ],
+        "proxy": {
+          "id": "xx",
+          "dns": 1,
+          "ip": "127.0.0.1",
+          "country": "sg",
+          "region": "singapore",
+          "city": "singapore",
+          "zipcode": "178958"
+        },
+        "gps": {
+          "longitude": 103.617722,
+          "latitude": 1.274802
+        },
+        "locale": {
+          "timezone": "Asia/Singapore",
+          "language": "en-SG"
+        },
+        "sim": {
+          "status": 1,
+          "country": "SG",
+          "msisdn": "+6580901521",
+          "operator": "M1 Limited",
+          "msin": "6810757229",
+          "iccid": "8965034385040921067",
+          "mcc": "525",
+          "mnc": "03"
+        },
+        "bluetooth": {
+          "name": "PDST00",
+          "address": "5b:c7:fc:bf:c0:ff"
+        },
+        "wifi": {
+          "status": 1,
+          "name": "Americo Kirlin",
+          "mac": "75:1C:2E:87:83:A3",
+          "bssid": "8f:2a:2d:1d:51:2c"
+        },
+        "device": {
+          "manufacturer": "oppo",
+          "brand": "oppo",
+          "model": "Oppo Reno5 Pro 5G",
+          "imei": 482564016639450,
+          "serialno": "a10df8e3",
+          "android_id": "5b35b20428b0019b",
+          "gsf_id": "3836f06b8e2836d6",
+          "gaid": "99cd9730-7d13-41c8-bae0-8dde08311d0c"
+        }
+      },
+      "message": "Success"
+    },
+    "result": {
+      "id": "xx",
+      "name": "xx",
+      "remark": "",
+      "os": "Andriod 12",
+      "adb_status": 0,
+      "adb": "",
+      "adb_password": "",
+      "group": [
+        {
+          "id": "xxxx",
+          "name": "xxxx"
+        },
+        {
+          "id": "xxxx",
+          "name": "xxxx"
+        }
+      ],
+      "proxy": {
+        "id": "xx",
+        "dns": 1,
+        "ip": "127.0.0.1",
+        "country": "sg",
+        "region": "singapore",
+        "city": "singapore",
+        "zipcode": "178958"
+      },
+      "gps": {
+        "longitude": 103.617722,
+        "latitude": 1.274802
+      },
+      "locale": {
+        "timezone": "Asia/Singapore",
+        "language": "en-SG"
+      },
+      "sim": {
+        "status": 1,
+        "country": "SG",
+        "msisdn": "+6580901521",
+        "operator": "M1 Limited",
+        "msin": "6810757229",
+        "iccid": "8965034385040921067",
+        "mcc": "525",
+        "mnc": "03"
+      },
+      "bluetooth": {
+        "name": "PDST00",
+        "address": "5b:c7:fc:bf:c0:ff"
+      },
+      "wifi": {
+        "status": 1,
+        "name": "Americo Kirlin",
+        "mac": "75:1C:2E:87:83:A3",
+        "bssid": "8f:2a:2d:1d:51:2c"
+      },
+      "device": {
+        "manufacturer": "oppo",
+        "brand": "oppo",
+        "model": "Oppo Reno5 Pro 5G",
+        "imei": "482564016639450",
+        "serialno": "a10df8e3",
+        "android_id": "5b35b20428b0019b",
+        "gsf_id": "3836f06b8e2836d6",
+        "gaid": "99cd9730-7d13-41c8-bae0-8dde08311d0c"
+      }
+    },
+    "notes": "Use image_id from both language examples and the CN parameter table; the EN table instead says image_ids. Device IMEI accepts numeric or string JSON."
+  },
+  {
+    "name": "CloudPhones.Update",
+    "operation": "CloudPhones.Update",
+    "path": "/api/v1/cloudPhone/update",
+    "source": "https://help.duoplus.net/docs/Batch-Modify-Parameters",
+    "checked_at": "2026-10-23",
+    "request": {
+      "images": [
+        {
+          "image_id": "phone-1",
+          "name": "Demo",
+          "dpi_name": "720x1280(320dpi)",
+          "remark": "test",
+          "proxy": {
+            "id": "proxy-1",
+            "dns": 1
+          },
+          "gps": {
+            "type": 2,
+            "longitude": 103.775322,
+            "latitude": 1.342415
+          },
+          "locale": {
+            "type": 2,
+            "timezone": "America/Chicago",
+            "language": "en-US"
+          },
+          "sim": {
+            "status": 1,
+            "country": "US",
+            "number_id": "number-1",
+            "msisdn": "+15056447080",
+            "operator": "T-Mobile USA",
+            "msin": "661024758",
+            "iccid": "8912607766605822130",
+            "mcc": "310",
+            "mnc": "260",
+            "imsi": "310260560389108"
+          },
+          "bluetooth": {
+            "name": "Demo",
+            "address": "3d:01:d7:20:fe:28"
+          },
+          "wifi": {
+            "status": 1,
+            "name": "Demo",
+            "mac": "F0:17:38:8F:9D:89",
+            "bssid": "6b:c1:a2:18:7f:d7"
+          },
+          "device": {
+            "imei": "857942225967646",
+            "serialno": "b5c35937",
+            "android_id": "4ac56870dc271490",
+            "name": "Demo",
+            "gsf_id": "3555f0641c1d1421",
+            "gaid": "2a4afd02-f4ea-44c3-9678-c27a6b8e506b"
+          },
+          "station": {
+            "lac": 55,
+            "cid": 18
+          }
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "xx"
+        ],
+        "fail": [
+          "xx"
+        ],
+        "fail_reason": {
+          "image_id": "xx"
+        }
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Models",
+    "operation": "CloudPhones.Models",
+    "path": "/api/v1/mobile/modelList",
+    "source": "https://help.duoplus.net/docs/cloud-phone-model-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "os": 1
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "oneplus": {
+          "ONEPLUS A5000": {
+            "name": "OnePlus5"
+          },
+          "ONEPLUS A5010": {
+            "name": "OnePlus5T"
+          },
+          "ONEPLUS A6000": {
+            "name": "OnePlus6"
+          }
+        },
+        "oppo": {
+          "CPH1819": {
+            "name": "OPPO F7"
+          }
+        }
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.BatchRoot",
+    "operation": "CloudPhones.BatchRoot",
+    "path": "/api/v1/cloudPhone/batchRoot",
+    "source": "https://help.duoplus.net/docs/Batch-Set-Root",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1"
+      ],
+      "status": 3,
+      "pkgs": [
+        "com.example.app"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "phone-ok"
+        ],
+        "fail": [
+          "phone-failed"
+        ],
+        "fail_reason": {
+          "phone-failed": "operation failed"
+        }
+      },
+      "message": "Success"
+    },
+    "notes": "The docs print a keyed fail_reason inside square brackets, which is invalid JSON; represented as an object, consistent with the other batch endpoints."
+  },
+  {
+    "name": "CloudPhones.Command",
+    "operation": "CloudPhones.Command",
+    "path": "/api/v1/cloudPhone/command",
+    "source": "https://help.duoplus.net/docs/execute-the-adb-command",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_id": "7Uw0M",
+      "command": "ls"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": true,
+        "content": "data\ntests\ntmp\ntraces\n",
+        "message": ""
+      },
+      "message": ""
+    }
+  },
+  {
+    "name": "CloudPhones.CommandBatch",
+    "operation": "CloudPhones.CommandBatch",
+    "path": "/api/v1/cloudPhone/command",
+    "source": "https://help.duoplus.net/docs/execute-the-adb-command",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "7Uw0M"
+      ],
+      "command": "ls"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "7Uw0M": {
+          "success": true,
+          "content": "data\ntests\ntmp\ntraces\n",
+          "message": ""
+        }
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.OpenADB",
+    "operation": "CloudPhones.OpenADB",
+    "path": "/api/v1/cloudPhone/openAdb",
+    "source": "https://help.duoplus.net/docs/Batch-Enable-ADB",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-ok",
+        "phone-failed"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "phone-ok"
+        ],
+        "fail": [
+          "phone-failed"
+        ],
+        "fail_reason": {
+          "phone-failed": "operation failed"
+        }
+      },
+      "message": "Success"
+    },
+    "notes": "The docs print a keyed fail_reason inside square brackets, which is invalid JSON; represented as an object, consistent with the other batch endpoints."
+  },
+  {
+    "name": "CloudPhones.CloseADB",
+    "operation": "CloudPhones.CloseADB",
+    "path": "/api/v1/cloudPhone/closeAdb",
+    "source": "https://help.duoplus.net/docs/Batch-Disable-ADB",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-ok",
+        "phone-failed"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "phone-ok"
+        ],
+        "fail": [
+          "phone-failed"
+        ],
+        "fail_reason": {
+          "phone-failed": "operation failed"
+        }
+      },
+      "message": "Success"
+    },
+    "notes": "The docs print a keyed fail_reason inside square brackets, which is invalid JSON; represented as an object, consistent with the other batch endpoints."
+  },
+  {
+    "name": "CloudPhones.UpdateSharePassword",
+    "operation": "CloudPhones.UpdateSharePassword",
+    "path": "/api/v1/cloudPhone/updateSharePassword",
+    "source": "https://help.duoplus.net/docs/Change-sharing-password",
+    "checked_at": "2026-10-23",
+    "request": {
+      "images": [
+        {
+          "image_id": "phone-1",
+          "password": "Example123"
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.LinkUsers",
+    "operation": "CloudPhones.LinkUsers",
+    "path": "/api/v1/cloudPhone/linkUserList",
+    "source": "https://help.duoplus.net/docs/connected-member-list",
+    "checked_at": "2026-10-23",
+    "request": {},
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "user_id": "oz7CD",
+            "nickname": "xx"
+          }
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Tags",
+    "operation": "CloudPhones.Tags",
+    "path": "/api/v1/cloudPhone/tagList",
+    "source": "https://help.duoplus.net/docs/tag-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "name": "Demo",
+      "page": 1,
+      "pagesize": 10
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "OT4m2",
+            "name": "xxx",
+            "color": "#2563eb",
+            "image_count": 1
+          }
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Resources",
+    "operation": "CloudPhones.Resources",
+    "path": "/api/v1/cloudPhone/cloudPhone",
+    "source": "https://help.duoplus.net/docs/os-region-list",
+    "checked_at": "2026-10-23",
+    "request": {},
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "name": "xx",
+            "region_id": "mgRg1",
+            "os": "Android 15",
+            "count": 0,
+            "used_count": 0
+          }
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Resolutions",
+    "operation": "CloudPhones.Resolutions",
+    "path": "/api/v1/cloudPhone/resolutionList",
+    "source": "https://help.duoplus.net/docs/Resolution-list",
+    "checked_at": "2026-10-23",
+    "request": {},
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          "720x1280(320dpi)",
+          "720x1600(320dpi)",
+          "1080x1920(480dpi)",
+          "1080x1920(320dpi)",
+          "1080x2040(480dpi)",
+          "1080x2040(320dpi)",
+          "1080x2160(480dpi)",
+          "1080x2160(320dpi)",
+          "1080x2280(480dpi)",
+          "1080x2280(320dpi)",
+          "1080x2340(480dpi)",
+          "1080x2340(320dpi)"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Purchase",
+    "operation": "CloudPhones.Purchase",
+    "path": "/api/v1/cloudPhone/purchase",
+    "source": "https://help.duoplus.net/docs/Buy-Cloud-Phone",
+    "checked_at": "2026-10-23",
+    "request": {
+      "quantity": 1,
+      "duration": "30",
+      "os": "12A",
+      "coupon_code": "TEST",
+      "renewal_status": 0
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "order_id": "xxxx",
+        "product_ids": [
+          "Wxx6",
+          "xxxP"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Renew",
+    "operation": "CloudPhones.Renew",
+    "path": "/api/v1/cloudPhone/renewal",
+    "source": "https://help.duoplus.net/docs/Renew-Cloud-Phone",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1"
+      ],
+      "duration": "30",
+      "coupon_code": "TEST"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "order_id": "xxxx",
+        "product_ids": [
+          "Wxx6",
+          "xxxP"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Share",
+    "operation": "CloudPhones.Share",
+    "path": "/api/v1/cloudPhone/share",
+    "source": "https://help.duoplus.net/docs/share",
+    "checked_at": "2026-10-23",
+    "request": {
+      "share": [
+        {
+          "image_ids": [
+            "phone-1"
+          ],
+          "config": {
+            "share_status": 1,
+            "share_phone_type": 3,
+            "share_code": "Example123",
+            "share_auth": [
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "image_ids": [
+            "phone-2"
+          ],
+          "config": {
+            "share_status": 2
+          }
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "phone-1": "https://share.example.test/?id=phone-1",
+        "phone-2": ""
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.InitProxy",
+    "operation": "CloudPhones.InitProxy",
+    "path": "/api/v1/cloudPhone/initProxy",
+    "source": "https://help.duoplus.net/docs/proxy-init",
+    "checked_at": "2026-10-23",
+    "request": {
+      "images": [
+        {
+          "image_id": "phone-1",
+          "name": "Demo",
+          "os": "15pro",
+          "ip_scan_channel": "ip2location",
+          "proxy": {
+            "protocol": "socks5",
+            "host": "192.0.2.1",
+            "port": 1080,
+            "user": "demo",
+            "password": "example"
+          },
+          "dpi_name": "720x1600(320dpi)",
+          "network_mode": 2,
+          "brand": "samsung",
+          "model": "SM-A025F",
+          "location": {
+            "longitude": 0,
+            "latitude": 51.5
+          },
+          "sim": {
+            "type": 2,
+            "country": "GB"
+          },
+          "locale": {
+            "country": "GB",
+            "timezone": "Europe/London",
+            "language": "en-GB"
+          }
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.SetProxyEnabled",
+    "operation": "CloudPhones.SetProxyEnabled",
+    "path": "/api/v1/cloudPhone/proxySwitch",
+    "source": "https://help.duoplus.net/docs/Enable-or-Disable-Cloud-Phone-Proxy",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1"
+      ],
+      "status": 0
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "xxxx"
+        ],
+        "fail": [
+          "xxxx"
+        ],
+        "fail_reason": {
+          "xxxx": "xxxxxxxxxxxxxxx"
+        }
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Timezones",
+    "operation": "CloudPhones.Timezones",
+    "path": "/api/v1/mobile/timezoneList",
+    "source": "https://help.duoplus.net/docs/timezone-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "iso": "GB"
+    },
+    "response": {
+      "code": 200,
+      "data": [
+        {
+          "id": "Europe/London",
+          "name": "Europe/London(GMT+01:00)"
+        }
+      ],
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Languages",
+    "operation": "CloudPhones.Languages",
+    "path": "/api/v1/mobile/languageList",
+    "source": "https://help.duoplus.net/docs/language-list",
+    "checked_at": "2026-10-23",
+    "request": {},
+    "response": {
+      "code": 200,
+      "data": [
+        {
+          "id": "en-GB",
+          "name": "English(en-GB)"
+        },
+        {
+          "id": "fa-AF",
+          "name": "Dari(fa-AF)"
+        },
+        {
+          "id": "sq-AL",
+          "name": "Albanian(sq-AL)"
+        }
+      ],
+      "message": "Success"
+    },
+    "notes": "The non-JSON ellipsis is omitted."
+  },
+  {
+    "name": "CloudPhones.ResetDevice",
+    "operation": "CloudPhones.ResetDevice",
+    "path": "/api/v1/cloudPhone/newPhone",
+    "source": "https://help.duoplus.net/docs/reset-and-regenerate-device",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_id": "phone-1",
+      "proxy_id": "proxy-1",
+      "dns": 1,
+      "model": "SM-A025F",
+      "gps": {
+        "type": 1,
+        "longitude": 88,
+        "latitude": 77
+      },
+      "locale": {
+        "type": 1,
+        "timezone": "America/Chicago",
+        "language": "en-US"
+      },
+      "sim": {
+        "type": 1,
+        "country": "US"
+      },
+      "data_type": 1,
+      "dpi_name": "720x1280(320dpi)",
+      "network_mode": 1,
+      "keep_gp": 0
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.Live",
+    "operation": "CloudPhones.Live",
+    "path": "/api/v1/cloudPhone/live",
+    "source": "https://help.duoplus.net/docs/Live-Streaming",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_id": "phone-1",
+      "id": "file-1",
+      "status": 1,
+      "loop": 2
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.ScanCode",
+    "operation": "CloudPhones.ScanCode",
+    "path": "/api/v1/cloudPhone/scan",
+    "source": "https://help.duoplus.net/docs/Scan-Code",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_id": "phone-1",
+      "id": "file-1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.SetAutoRenewal",
+    "operation": "CloudPhones.SetAutoRenewal",
+    "path": "/api/v1/cloudPhone/autoRenewal",
+    "source": "https://help.duoplus.net/docs/Enable-Disable-AutoRenewal",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1"
+      ],
+      "status": 0
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.ConvertVersion",
+    "operation": "CloudPhones.ConvertVersion",
+    "path": "/api/v1/cloudPhone/convertVersion",
+    "source": "https://help.duoplus.net/docs/Convert-the-Android-version",
+    "checked_at": "2026-10-23",
+    "request": {
+      "images": [
+        {
+          "image_id": "phone-1",
+          "os": "15pro"
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "Lx2jt",
+          "r5wfl"
+        ],
+        "fail": [],
+        "fail_reason": {}
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudNumbers.List",
+    "operation": "CloudNumbers.List",
+    "path": "/api/v1/cloudNumber/numberList",
+    "source": "https://help.duoplus.net/docs/cloud-number-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 10,
+      "id": [
+        "number-1"
+      ],
+      "phone_number": "+15056447080",
+      "region_ids": [
+        "US",
+        "GB"
+      ],
+      "type_ids": [
+        0,
+        1
+      ],
+      "status": [
+        2
+      ],
+      "renewal_status": [
+        1,
+        0
+      ],
+      "remark": "test",
+      "sort_by": "created_at",
+      "order": "asc"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "6XdPL",
+            "phone_number": "",
+            "assigned": true,
+            "region_name": "US",
+            "type_name": "VOIP",
+            "renewal_status": 0,
+            "remark": "",
+            "status_name": "Normal",
+            "expired_at": "2026-01-30 18:10:49",
+            "created_at": "2025-12-08 11:05:15"
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudNumbers.SMSList",
+    "operation": "CloudNumbers.SMSList",
+    "path": "/api/v1/cloudNumber/smsList",
+    "source": "https://help.duoplus.net/docs/sms-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "number_id": "number-1",
+      "page": 1,
+      "pagesize": 50
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "message": "xxxxx",
+            "code": "xxxx",
+            "received_at": "2026-03-20 10:10:00"
+          },
+          {
+            "message": "xxxxx",
+            "code": "xxxx",
+            "received_at": "2026-03-20 10:00:00"
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 2,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudNumbers.WriteSMS",
+    "operation": "CloudNumbers.WriteSMS",
+    "path": "/api/v1/cloudNumber/imageWriteSms",
+    "source": "https://help.duoplus.net/docs/write-sms-to-cloud-phone",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_id": [
+        "phone-1"
+      ],
+      "sms": [
+        {
+          "phone": "+15056447080",
+          "message": "hello"
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "success"
+      },
+      "message": "success"
+    }
+  },
+  {
+    "name": "CloudNumbers.PurchasePackages",
+    "operation": "CloudNumbers.PurchasePackages",
+    "path": "/api/v1/cloudNumber/purchasePackage",
+    "source": "https://help.duoplus.net/docs/Region-and-type-list",
+    "checked_at": "2026-10-23",
+    "request": {},
+    "response": {
+      "code": 200,
+      "data": [
+        {
+          "type": 0,
+          "name": "VOIP",
+          "country": [
+            {
+              "region": "US",
+              "name": "US",
+              "durations": [
+                {
+                  "name": "30 days",
+                  "days": 30,
+                  "gif_days": 0,
+                  "random_gif_days": "25-50",
+                  "is_special_offer": 0,
+                  "price": 4.9,
+                  "card_price": 0,
+                  "total_price": 4.9
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": 1,
+          "name": "Non-VOIP",
+          "country": [
+            {
+              "region": "US",
+              "name": "US",
+              "durations": [
+                {
+                  "name": "29 days",
+                  "days": 29,
+                  "gif_days": 0,
+                  "random_gif_days": "",
+                  "is_special_offer": 1,
+                  "price": 13.47,
+                  "card_price": 0,
+                  "total_price": 13.47
+                },
+                {
+                  "name": "30 days",
+                  "days": 30,
+                  "gif_days": 0,
+                  "random_gif_days": "",
+                  "is_special_offer": 0,
+                  "price": 19.9,
+                  "card_price": 2.9,
+                  "total_price": 22.8
+                },
+                {
+                  "name": "360 days",
+                  "days": 365,
+                  "gif_days": 5,
+                  "random_gif_days": "",
+                  "is_special_offer": 0,
+                  "price": 191.04,
+                  "card_price": 2.9,
+                  "total_price": 193.94
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudNumbers.PackageDurations",
+    "operation": "CloudNumbers.PackageDurations",
+    "path": "/api/v1/cloudNumber/package",
+    "source": "https://help.duoplus.net/docs/purchase-package-details",
+    "checked_at": "2026-10-23",
+    "request": {
+      "region": "US",
+      "type": 0
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "duration": [
+          "30 days",
+          "87 days",
+          "360 days"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudNumbers.Purchase",
+    "operation": "CloudNumbers.Purchase",
+    "path": "/api/v1/cloudNumber/purchase",
+    "source": "https://help.duoplus.net/docs/Purchase-Cloud-Numbers",
+    "checked_at": "2026-10-23",
+    "request": {
+      "region": "US",
+      "duration": 30,
+      "type": 0,
+      "quantity": 2,
+      "renewal_status": 0,
+      "coupon_code": "TEST"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "order_id": "xxxx",
+        "product_ids": [
+          "xxxx",
+          "xxxx"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudNumbers.RenewalPackages",
+    "operation": "CloudNumbers.RenewalPackages",
+    "path": "/api/v1/cloudNumber/renewalPackage",
+    "source": "https://help.duoplus.net/docs/renewal-package-details",
+    "checked_at": "2026-10-23",
+    "request": {
+      "number_ids": [
+        "number-1"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "numbers": [
+          {
+            "id": "xxxxx",
+            "phone_number": "+150xxxxxxxx",
+            "expired_at": "1849316235",
+            "duration": [
+              30,
+              180,
+              365
+            ]
+          },
+          {
+            "id": "xxxxx",
+            "phone_number": "+150xxxxxxxx",
+            "expired_at": "1789294999",
+            "duration": [
+              29,
+              90
+            ]
+          }
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudNumbers.Renew",
+    "operation": "CloudNumbers.Renew",
+    "path": "/api/v1/cloudNumber/renewal",
+    "source": "https://help.duoplus.net/docs/Renew-Cloud-Numbers",
+    "checked_at": "2026-10-23",
+    "request": {
+      "list": [
+        {
+          "number_ids": [
+            "number-1"
+          ],
+          "duration": 30
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "order_id": "xxxx",
+        "product_ids": [
+          "xxxx",
+          "xxxx"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudNumbers.SetAutoRenewal",
+    "operation": "CloudNumbers.SetAutoRenewal",
+    "path": "/api/v1/cloudNumber/autoRenewal",
+    "source": "https://help.duoplus.cn/docs/kai-qi-guan-bi-zi-dong-xu-fei-X1EU",
+    "checked_at": "2026-10-23",
+    "request": {
+      "number_ids": [
+        "number-1"
+      ],
+      "type": 0
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    },
+    "notes": "The EN page incorrectly prints the proxy auto-renewal path; use the CN cloud-number path."
+  },
+  {
+    "name": "Groups.List",
+    "operation": "Groups.List",
+    "path": "/api/v1/cloudPhone/groupList",
+    "source": "https://help.duoplus.net/docs/cloud-phone-group-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "9JKzb",
+            "name": "xx",
+            "sort": 1000,
+            "remark": ""
+          }
+        ],
+        "page": 1,
+        "pagesize": 200,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Groups.AddPhones",
+    "operation": "Groups.AddPhones",
+    "path": "/api/v1/cloudPhone/addToGroup",
+    "source": "https://help.duoplus.net/docs/Batch-Add-to-Groups",
+    "checked_at": "2026-10-23",
+    "request": {
+      "id": "group-1",
+      "image_ids": [
+        "phone-1"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Groups.MovePhones",
+    "operation": "Groups.MovePhones",
+    "path": "/api/v1/cloudPhone/moveToGroup",
+    "source": "https://help.duoplus.net/docs/Batch-Move-to-Groups",
+    "checked_at": "2026-10-23",
+    "request": {
+      "id": "group-1",
+      "image_ids": [
+        "phone-1"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Groups.Create",
+    "operation": "Groups.Create",
+    "path": "/api/v1/cloudPhone/createGroup",
+    "source": "https://help.duoplus.net/docs/Batch-Create-Groups",
+    "checked_at": "2026-10-23",
+    "request": {
+      "list": [
+        {
+          "name": "Demo",
+          "sort": 100,
+          "remark": "test"
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          {
+            "index": 0,
+            "id": "xx",
+            "name": "xx",
+            "sort": 100,
+            "remark": "xx"
+          }
+        ],
+        "fail": [
+          {
+            "index": 1,
+            "code": 408,
+            "message": "xx"
+          }
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Groups.Update",
+    "operation": "Groups.Update",
+    "path": "/api/v1/cloudPhone/updateGroup",
+    "source": "https://help.duoplus.net/docs/Batch-Edit-Groups",
+    "checked_at": "2026-10-23",
+    "request": {
+      "list": [
+        {
+          "id": "group-1",
+          "name": "Demo",
+          "sort": 100,
+          "remark": ""
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          {
+            "index": 0,
+            "id": "xx",
+            "name": "xx",
+            "sort": 100,
+            "remark": "xx"
+          }
+        ],
+        "fail": [
+          {
+            "index": 1,
+            "code": 408,
+            "message": "xx"
+          }
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Groups.Delete",
+    "operation": "Groups.Delete",
+    "path": "/api/v1/cloudPhone/deleteGroup",
+    "source": "https://help.duoplus.net/docs/Batch-Delete-Groups",
+    "checked_at": "2026-10-23",
+    "request": {
+      "ids": [
+        "group-1"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "xx"
+        ],
+        "fail": [
+          "xx"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Proxies.List",
+    "operation": "Proxies.List",
+    "path": "/api/v1/proxy/list",
+    "source": "https://help.duoplus.cn/docs/proxy-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 100,
+      "status": [
+        1,
+        2
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "xx",
+            "name": "xx",
+            "host": "127.0.0.1",
+            "port": "3001",
+            "user": "user",
+            "area": "US",
+            "group_ids": [
+              "xxxx",
+              "xxxx"
+            ],
+            "group_name": [
+              "xxxx",
+              "xxxx"
+            ]
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    },
+    "notes": "The optional status filter is documented only in CN."
+  },
+  {
+    "name": "Proxies.Add",
+    "operation": "Proxies.Add",
+    "path": "/api/v1/proxy/add",
+    "source": "https://help.duoplus.net/docs/Batch-Add-Proxies",
+    "checked_at": "2026-10-23",
+    "request": {
+      "proxy_list": [
+        {
+          "protocol": "socks5",
+          "host": "192.0.2.1",
+          "port": 1080,
+          "user": "demo",
+          "password": "example",
+          "name": "Demo"
+        }
+      ],
+      "ip_scan_channel": "ip2location"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          {
+            "index": 0,
+            "id": "xx"
+          }
+        ],
+        "fail": [
+          {
+            "index": 1,
+            "message": "xx"
+          }
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Proxies.Delete",
+    "operation": "Proxies.Delete",
+    "path": "/api/v1/proxy/delete",
+    "source": "https://help.duoplus.net/docs/Batch-Delete-Proxies",
+    "checked_at": "2026-10-23",
+    "request": {
+      "ids": [
+        "proxy-1"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "xx"
+        ],
+        "fail": [
+          "xx"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Proxies.RefreshURLs",
+    "operation": "Proxies.RefreshURLs",
+    "path": "/api/v1/proxy/refresh",
+    "source": "https://help.duoplus.net/docs/Batch-Refresh-URL",
+    "checked_at": "2026-10-23",
+    "request": {
+      "ids": [
+        "proxy-1"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "xx"
+        ],
+        "fail": [
+          "xx"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Proxies.Update",
+    "operation": "Proxies.Update",
+    "path": "/api/v1/proxy/update",
+    "source": "https://help.duoplus.net/docs/Modify-Proxy",
+    "checked_at": "2026-10-23",
+    "request": {
+      "id": "proxy-1",
+      "name": "Demo",
+      "host": "192.0.2.1",
+      "port": 1080,
+      "user": "demo",
+      "password": "example",
+      "ip_scan_channel": "ip2location",
+      "protocol": "socks5",
+      "refresh_url": "https://proxy.example.test/refresh",
+      "proxy_url": "demo:example@192.0.2.1:1080"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "success",
+        "result": []
+      },
+      "message": "success"
+    }
+  },
+  {
+    "name": "Proxies.Check",
+    "operation": "Proxies.Check",
+    "path": "/api/v1/proxy/check",
+    "source": "https://help.duoplus.net/docs/Check-Proxy",
+    "checked_at": "2026-10-23",
+    "request": {
+      "proxy_id": "proxy-1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": true,
+        "ip": "64.188.10.193",
+        "country": "us",
+        "region": "new york",
+        "city": "buffalo",
+        "timezone": "America/New_York",
+        "longitude": "-78.882486",
+        "latitude": "42.878243",
+        "tips": "",
+        "user": "xxxxx",
+        "password": "xxxxx"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Proxies.SetAutoRenewal",
+    "operation": "Proxies.SetAutoRenewal",
+    "path": "/api/v1/proxy/autoRenewal",
+    "source": "https://help.duoplus.net/docs/Enable-Disable-AutoRenewal-rq2g",
+    "checked_at": "2026-10-23",
+    "request": {
+      "proxy_ids": [
+        "proxy-1"
+      ],
+      "type": 1
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "SubscriptionStartups.List",
+    "operation": "SubscriptionStartups.List",
+    "path": "/api/v1/subscriptionStartup/list",
+    "source": "https://help.duoplus.net/docs/Subscription-Startup-List",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 10,
+      "id": "startup-1",
+      "name": "Demo",
+      "renewal_status": 0,
+      "free_status": 0,
+      "remark": "test",
+      "sort_by": "created_at",
+      "order": "desc"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "xx",
+            "name": "xx",
+            "cpu": "xx",
+            "ram": "4G",
+            "rom": "32G",
+            "renewal_status": 0,
+            "free_status": 0,
+            "remark": "xx",
+            "expired_at": "1770108845",
+            "created_at": "1759136045",
+            "need_renewal": false
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "SubscriptionStartups.Purchase",
+    "operation": "SubscriptionStartups.Purchase",
+    "path": "/api/v1/subscriptionStartup/purchase",
+    "source": "https://help.duoplus.net/docs/Subscription-Startup",
+    "checked_at": "2026-10-23",
+    "request": {
+      "duration": "90",
+      "quantity": 1,
+      "coupon_code": "TEST",
+      "renewal_status": 0
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "order_id": "xxxx",
+        "product_ids": [
+          "Wxx6",
+          "xxxP"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "SubscriptionStartups.Renew",
+    "operation": "SubscriptionStartups.Renew",
+    "path": "/api/v1/subscriptionStartup/renewal",
+    "source": "https://help.duoplus.net/docs/Renew-Subscription-Startup",
+    "checked_at": "2026-10-23",
+    "request": {
+      "phone_ids": [
+        "startup-1"
+      ],
+      "duration": "90",
+      "coupon_code": "TEST"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "order_id": "xxxx",
+        "product_ids": [
+          "Wxx6",
+          "xxxP"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "SubscriptionStartups.SetAutoRenewal",
+    "operation": "SubscriptionStartups.SetAutoRenewal",
+    "path": "/api/v1/subscriptionStartup/autoRenewal",
+    "source": "https://help.duoplus.net/docs/Enable-Disable-AutoRenewal-mb78",
+    "checked_at": "2026-10-23",
+    "request": {
+      "phone_ids": [
+        "startup-1"
+      ],
+      "status": 0
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Apps.ListPlatform",
+    "operation": "Apps.ListPlatform",
+    "path": "/api/v1/app/list",
+    "source": "https://help.duoplus.net/docs/List-of-Platform-App",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 100
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "9Jp7o#0",
+            "name": "TikTok",
+            "pkg": "com.zhiliaoapp.musically",
+            "version_list": [
+              {
+                "id": "9Jp7o#0",
+                "name": "33.0.3"
+              },
+              {
+                "id": "QYAoK#0",
+                "name": "37.6.3"
+              }
+            ]
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Apps.ListTeam",
+    "operation": "Apps.ListTeam",
+    "path": "/api/v1/app/teamList",
+    "source": "https://help.duoplus.net/docs/List-of-Team-App",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 100
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "9Jp7o#1",
+            "name": "TikTok",
+            "pkg": "com.zhiliaoapp.musically",
+            "version_list": [
+              {
+                "id": "9Jp7o#1",
+                "name": "33.0.3"
+              }
+            ]
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Apps.Install",
+    "operation": "Apps.Install",
+    "path": "/api/v1/app/install",
+    "source": "https://help.duoplus.net/docs/Batch-Install-App",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1"
+      ],
+      "app_id": "9Jp7o#0",
+      "app_version_id": "QYAoK#0"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Apps.Installed",
+    "operation": "Apps.Installed",
+    "path": "/api/v1/app/installedList",
+    "source": "https://help.duoplus.net/docs/List-of-Installed-App",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_id": "phone-1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          "com.zhiliaoapp.musically",
+          "com.twitter.android"
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Apps.Uninstall",
+    "operation": "Apps.Uninstall",
+    "path": "/api/v1/app/uninstall",
+    "source": "https://help.duoplus.net/docs/Batch-Uninstall-App",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1"
+      ],
+      "pkg": "com.example.app"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Apps.Start",
+    "operation": "Apps.Start",
+    "path": "/api/v1/app/start",
+    "source": "https://help.duoplus.net/docs/Batch-Start-App",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1"
+      ],
+      "pkg": "com.example.app"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Apps.Stop",
+    "operation": "Apps.Stop",
+    "path": "/api/v1/app/stop",
+    "source": "https://help.duoplus.net/docs/Batch-Close-App",
+    "checked_at": "2026-10-23",
+    "request": {
+      "image_ids": [
+        "phone-1"
+      ],
+      "pkg": "com.example.app"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudDisk.List",
+    "operation": "CloudDisk.List",
+    "path": "/api/v1/cloudDisk/list",
+    "source": "https://help.duoplus.net/docs/File-List",
+    "checked_at": "2026-10-23",
+    "request": {
+      "keyword": "apk",
+      "page": 2,
+      "pagesize": 10
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "ReCTB",
+            "name": "deviceids.xapk",
+            "original_file_name": "deviceids.xapk"
+          }
+        ],
+        "page": 2,
+        "pagesize": 10,
+        "limit": 10,
+        "offset": 10,
+        "total": 11,
+        "total_page": 2
+      },
+      "message": "Success"
+    },
+    "notes": "Pagination values exercise a nonzero offset on the second page; field names and types follow the published example."
+  },
+  {
+    "name": "CloudDisk.PushFiles",
+    "operation": "CloudDisk.PushFiles",
+    "path": "/api/v1/cloudDisk/pushFiles",
+    "source": "https://help.duoplus.net/docs/File-push",
+    "checked_at": "2026-10-23",
+    "request": {
+      "ids": [
+        "file-1"
+      ],
+      "image_ids": [
+        "phone-1",
+        "phone-2"
+      ],
+      "dest_dir": "/sdcard/Download"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "Success",
+        "success": [
+          {
+            "image_id": "xx",
+            "id": "xx"
+          }
+        ],
+        "fail": [
+          {
+            "image_id": "xx",
+            "id": "xx",
+            "err": "xx"
+          }
+        ]
+      },
+      "message": "Failed"
+    }
+  },
+  {
+    "name": "CloudDisk.Delete",
+    "operation": "CloudDisk.Delete",
+    "path": "/api/v1/cloudDisk/delFiles",
+    "source": "https://help.duoplus.net/docs/Delete-Cloud-Drive-Files",
+    "checked_at": "2026-10-23",
+    "request": {
+      "ids": [
+        "file-1"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "success"
+      },
+      "message": "success"
+    }
+  },
+  {
+    "name": "CloudDisk.SignedURL",
+    "operation": "CloudDisk.SignedURL",
+    "path": "/api/v1/cloudDisk/signedUrl",
+    "source": "https://help.duoplus.net/docs/Upload-Local-Files-to-Cloud-Drive",
+    "checked_at": "2026-10-23",
+    "request": {
+      "name": "test.apk",
+      "is_app": 1,
+      "pkg": "com.example.app"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "method": "PUT",
+        "signedUrl": "https://storage.example.test/test.apk?Signature=fixture",
+        "headers": {
+          "x-oss-callback": "fixture-callback",
+          "x-oss-callback-var": "fixture-vars"
+        },
+        "name": "test.apk",
+        "original_file_name": "test.apk"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Automation.ListUserTemplates",
+    "operation": "Automation.ListUserTemplates",
+    "path": "/api/v1/automation/userTemplateList",
+    "source": "https://help.duoplus.net/docs/Custom-Template-List",
+    "checked_at": "2026-10-23",
+    "request": {
+      "name": "Login",
+      "page": 1,
+      "pagesize": 10
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "xxx",
+            "name": "名称",
+            "desc": "描述"
+          },
+          {
+            "id": "xxx",
+            "name": "名称",
+            "desc": "描述"
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 2,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Automation.ListOfficialTemplates",
+    "operation": "Automation.ListOfficialTemplates",
+    "path": "/api/v1/automation/officialTemplateList",
+    "source": "https://help.duoplus.net/docs/Official-Template-List",
+    "checked_at": "2026-10-23",
+    "request": {
+      "name": "Login",
+      "page": 1,
+      "pagesize": 10
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "AI1PD",
+            "version": [
+              "45.3.3",
+              "46.2.3"
+            ],
+            "lang": [
+              "English"
+            ],
+            "name": "xxxxxxx",
+            "desc": "xxxxxxx",
+            "rpa_android_version": "Android 15pro/15",
+            "is_ai_rpa": 1,
+            "is_cloud_disk": 0,
+            "is_pinned": true,
+            "pinned_at": "2026-09-24 15:46:14.433"
+          },
+          {
+            "id": "TZtwq",
+            "version": [
+              "45.3.3",
+              "46.2.3"
+            ],
+            "lang": [
+              "English"
+            ],
+            "name": "xxxxxxx",
+            "desc": "xxxxxxx",
+            "rpa_android_version": "Android 15pro/15",
+            "is_ai_rpa": 1,
+            "is_cloud_disk": 0,
+            "is_pinned": false,
+            "pinned_at": ""
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 2,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Automation.UserTemplateInfo",
+    "operation": "Automation.UserTemplateInfo",
+    "path": "/api/v1/automation/userTemplateInfo",
+    "source": "https://help.duoplus.net/docs/Custom-Template-Details",
+    "checked_at": "2026-10-23",
+    "request": {
+      "id": "mgRg1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "info": {
+          "id": "mgRg1",
+          "name": "Tiktok Login",
+          "desc": "xxxxxxxxx",
+          "exception_type": 0,
+          "dump_type": 0,
+          "config": [
+            {
+              "key": "username",
+              "value": "username",
+              "type": "string",
+              "required": true,
+              "desc": "Enter search contents (search topics):"
+            },
+            {
+              "key": "password",
+              "value": "password",
+              "type": "string",
+              "required": true,
+              "desc": "Enter search contents (search topics):"
+            }
+          ]
+        }
+      },
+      "message": "Success"
+    },
+    "result": {
+      "id": "mgRg1",
+      "name": "Tiktok Login",
+      "desc": "xxxxxxxxx",
+      "exception_type": 0,
+      "dump_type": 0,
+      "config": [
+        {
+          "key": "username",
+          "value": "username",
+          "type": "string",
+          "required": true,
+          "desc": "Enter search contents (search topics):"
+        },
+        {
+          "key": "password",
+          "value": "password",
+          "type": "string",
+          "required": true,
+          "desc": "Enter search contents (search topics):"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Automation.OfficialTemplateInfo",
+    "operation": "Automation.OfficialTemplateInfo",
+    "path": "/api/v1/automation/officialTemplateInfo",
+    "source": "https://help.duoplus.net/docs/Official-Template-Details",
+    "checked_at": "2026-10-23",
+    "request": {
+      "id": "mgRg1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "info": {
+          "id": "mgRg1",
+          "app_id": "qunBQ",
+          "name": "Tiktok Login",
+          "desc": "xxxxxxx",
+          "exception_type": 0,
+          "dump_type": 0,
+          "config": [
+            {
+              "key": "username",
+              "value": "username",
+              "type": "string",
+              "required": true,
+              "desc": "Enter search contents (search topics):"
+            },
+            {
+              "key": "password",
+              "value": "password",
+              "type": "string",
+              "required": true,
+              "desc": "Enter search contents (search topics):"
+            }
+          ]
+        }
+      },
+      "message": "Success"
+    },
+    "result": {
+      "id": "mgRg1",
+      "app_id": "qunBQ",
+      "name": "Tiktok Login",
+      "desc": "xxxxxxx",
+      "exception_type": 0,
+      "dump_type": 0,
+      "config": [
+        {
+          "key": "username",
+          "value": "username",
+          "type": "string",
+          "required": true,
+          "desc": "Enter search contents (search topics):"
+        },
+        {
+          "key": "password",
+          "value": "password",
+          "type": "string",
+          "required": true,
+          "desc": "Enter search contents (search topics):"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Automation.CreateTask",
+    "operation": "Automation.CreateTask",
+    "path": "/api/v1/automation/addTask",
+    "source": "https://help.duoplus.net/docs/Create-Scheduled-Task",
+    "checked_at": "2026-10-23",
+    "request": {
+      "template_id": "template-1",
+      "template_type": 2,
+      "name": "Demo",
+      "remark": "test",
+      "images": [
+        {
+          "image_id": "phone-1",
+          "issue_at": "2026-11-01 14:01",
+          "config": {
+            "file": {
+              "key": "file",
+              "value": [
+                "file-1",
+                "https://example.test/image.png"
+              ],
+              "type": "file",
+              "required": true
+            },
+            "text": {
+              "key": "text",
+              "value": "hello\nworld",
+              "type": "textarea",
+              "required": true
+            },
+            "bool": {
+              "key": "bool",
+              "value": "true",
+              "type": "boolean",
+              "required": true
+            },
+            "age": {
+              "key": "age",
+              "value": "18",
+              "type": "number",
+              "required": true
+            }
+          }
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "success"
+      },
+      "message": "success"
+    }
+  },
+  {
+    "name": "Automation.CreatePlan",
+    "operation": "Automation.CreatePlan",
+    "path": "/api/v1/automation/addPlan",
+    "source": "https://help.duoplus.net/docs/Create-Loop-Task",
+    "checked_at": "2026-10-23",
+    "request": {
+      "template_id": "template-1",
+      "template_type": 2,
+      "name": "Demo",
+      "remark": "test",
+      "images": [
+        {
+          "image_id": "phone-1",
+          "start_at": "2026-11-01 17:38",
+          "end_at": "2026-11-25 18:08",
+          "execute_type": 4,
+          "gap_time": 20,
+          "execute_time": "15:11",
+          "execute_end_time": "18:00",
+          "mode": 2,
+          "weeks": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "days": [
+            "10",
+            "15",
+            "20",
+            "25"
+          ],
+          "config": {
+            "text": {
+              "key": "text",
+              "value": "hello",
+              "type": "string",
+              "required": true
+            }
+          }
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "id": "xxxx"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Automation.ListPlans",
+    "operation": "Automation.ListPlans",
+    "path": "/api/v1/automation/planList",
+    "source": "https://help.duoplus.net/docs/loop-task-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 10,
+      "id": "plan-1",
+      "name": "Demo",
+      "status": [
+        1,
+        2
+      ],
+      "template_type": [
+        1,
+        2
+      ],
+      "remark": "test"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "xxx",
+            "name": "xxx",
+            "remark": "xxx",
+            "task_type_name": "Official Template",
+            "status": 1,
+            "created_at": "2026-01-12 17:04:22"
+          }
+        ],
+        "page": 1,
+        "pagesize": 5,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Automation.SavePlan",
+    "operation": "Automation.SavePlan",
+    "path": "/api/v1/automation/savePlan",
+    "source": "https://help.duoplus.cn/docs/save-plan",
+    "checked_at": "2026-10-23",
+    "request": {
+      "id": "plan-1",
+      "name": "Demo",
+      "remark": "",
+      "images": [
+        {
+          "image_id": "phone-1",
+          "start_at": "2026-11-01 17:38",
+          "end_at": "2026-11-25 18:08",
+          "execute_type": 4,
+          "gap_time": 20,
+          "execute_time": "15:11",
+          "execute_end_time": "18:00",
+          "mode": 2,
+          "weeks": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "days": [
+            "10",
+            "15",
+            "20",
+            "25"
+          ]
+        }
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "id": "xxxx"
+      },
+      "message": "Success"
+    },
+    "notes": "Keep weeks/days as strings, as shown in CN and the create-plan example. The EN edit-plan example uses numbers."
+  },
+  {
+    "name": "Automation.SetPlanStatus",
+    "operation": "Automation.SetPlanStatus",
+    "path": "/api/v1/automation/setPlanStatus",
+    "source": "https://help.duoplus.net/docs/pause-execute-loop-task",
+    "checked_at": "2026-10-23",
+    "request": {
+      "id": "plan-1",
+      "status": 0
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "id": "xxx"
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Automation.DeletePlan",
+    "operation": "Automation.DeletePlan",
+    "path": "/api/v1/automation/deletePlan",
+    "source": "https://help.duoplus.net/docs/delete-loop-task",
+    "checked_at": "2026-10-23",
+    "request": {
+      "id": "plan-1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "success"
+      },
+      "message": "success"
+    }
+  },
+  {
+    "name": "Automation.ListTasks",
+    "operation": "Automation.ListTasks",
+    "path": "/api/v1/automation/taskList",
+    "source": "https://help.duoplus.net/docs/scheduled-task-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 10,
+      "status": [
+        0,
+        3,
+        4
+      ],
+      "issue_at_start": "2026-11-01 00:00:00",
+      "issue_at_end": "2026-11-30 23:59:59",
+      "sort_by": "issue_at",
+      "order": "desc",
+      "id": "task-1",
+      "name": "Demo",
+      "template_type": [
+        1
+      ],
+      "image_name": "Demo",
+      "image_ip": "192.0.2.1",
+      "execution_at_start": "2026-11-01 00:00:00",
+      "execution_at_end": "2026-11-23 23:59:59"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "xxx",
+            "name": "xxx",
+            "task_type_name": "Official template",
+            "image_name": "xxx",
+            "ip": "xxx",
+            "remark": "xxx",
+            "status": 3,
+            "issue_at": "2026-01-10 00:00",
+            "start_at": "2026-01-13 13:04:01",
+            "finish_at": "2026-01-13 13:07:19",
+            "cost_time": 198,
+            "execution_time": "2026-01-13 13:04~2026-01-13 13:07",
+            "created_at": "2026-01-13 13:02:35"
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Automation.ListTaskLogs",
+    "operation": "Automation.ListTaskLogs",
+    "path": "/api/v1/automation/taskLogList",
+    "source": "https://help.duoplus.net/docs/scheduled-task-report",
+    "checked_at": "2026-10-23",
+    "request": {
+      "task_id": "task-1",
+      "cursor_id": "log-1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "xxx",
+            "result_info": {
+              "action": "START",
+              "result": true,
+              "error_message": "",
+              "error_img": "",
+              "condition_result_message": "",
+              "extra_data": {
+                "screenshot": "",
+                "data": [],
+                "email": {
+                  "subject": "",
+                  "sender": "",
+                  "receive_time": "",
+                  "content": ""
+                }
+              }
+            },
+            "start_at": "2026-01-15 05:43:16 912",
+            "finish_at": "2026-01-15 05:43:16 912",
+            "created_at": "2026-01-15 19:43:20"
+          },
+          {
+            "id": "xxx",
+            "result_info": {
+              "action": "DESKTOP",
+              "result": true,
+              "error_message": "",
+              "error_img": "",
+              "condition_result_message": "",
+              "extra_data": {
+                "screenshot": "",
+                "data": [],
+                "email": {
+                  "subject": "",
+                  "sender": "",
+                  "receive_time": "",
+                  "content": ""
+                }
+              }
+            },
+            "start_at": "2026-01-15 05:43:20 827",
+            "finish_at": "2026-01-15 05:43:20 832",
+            "created_at": "2026-01-15 19:43:22"
+          },
+          {
+            "id": "xxx",
+            "result_info": {
+              "action": "OPEN_APP",
+              "result": true,
+              "error_message": "",
+              "error_img": "",
+              "condition_result_message": "",
+              "extra_data": {
+                "screenshot": "",
+                "data": {
+                  "action": "OPEN_APP",
+                  "package_name": "xxx",
+                  "uri": "",
+                  "desc": "",
+                  "exception_type": "2",
+                  "id": "1762945520"
+                },
+                "email": {
+                  "subject": "",
+                  "sender": "",
+                  "receive_time": "",
+                  "content": ""
+                }
+              }
+            },
+            "start_at": "2026-01-15 05:43:30 672",
+            "finish_at": "2026-01-15 05:43:30 687",
+            "created_at": "2026-01-15 19:43:32"
+          },
+          {
+            "id": "tG2IN",
+            "result_info": {
+              "action": "CLICK_ELEMENT",
+              "result": false,
+              "error_message": "xxx",
+              "error_img": "xxx",
+              "condition_result_message": "",
+              "extra_data": {
+                "screenshot": "",
+                "data": {
+                  "action": "CLICK_ELEMENT",
+                  "save_result": "",
+                  "desc": "",
+                  "element_type": "element_selector",
+                  "use_offset": false,
+                  "exception_type": "2",
+                  "selector_bean_list": [
+                    {
+                      "class": "android.widget.TextView"
+                    },
+                    {
+                      "text": "Home"
+                    }
+                  ],
+                  "selector_condition": "contain",
+                  "waiting_time": "3000",
+                  "type": "fixed_value",
+                  "fixed_value": "1",
+                  "operator": "",
+                  "number": "",
+                  "id": "xxx"
+                },
+                "email": {
+                  "subject": "",
+                  "sender": "",
+                  "receive_time": "",
+                  "content": ""
+                }
+              }
+            },
+            "start_at": "2026-01-15 05:43:32 642",
+            "finish_at": "2026-01-15 05:43:36 011",
+            "created_at": "2026-01-15 19:43:37"
+          }
+        ]
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Automation.UpdateTaskTime",
+    "operation": "Automation.UpdateTaskTime",
+    "path": "/api/v1/automation/updateTaskTime",
+    "source": "https://help.duoplus.net/docs/modify-publish-time",
+    "checked_at": "2026-10-23",
+    "request": {
+      "id": "task-1",
+      "issue_at": "2026-11-01 00:00"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "success"
+      },
+      "message": "success"
+    }
+  },
+  {
+    "name": "Automation.SetTaskStatus",
+    "operation": "Automation.SetTaskStatus",
+    "path": "/api/v1/automation/setTaskStatus",
+    "source": "https://help.duoplus.net/docs/Cancel-Reexecute-Scheduled-Task",
+    "checked_at": "2026-10-23",
+    "request": {
+      "ids": [
+        "task-1",
+        "task-2"
+      ],
+      "status": 5
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": [
+          "xxx"
+        ],
+        "fail": [
+          "xxx"
+        ],
+        "fail_reason": {
+          "xxx": "xxxxx"
+        }
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Team.Orders",
+    "operation": "Team.Orders",
+    "path": "/api/v1/team/order",
+    "source": "https://help.duoplus.net/docs/order-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 200,
+      "image_ids": [
+        "phone-1"
+      ],
+      "type": [
+        "2",
+        "3"
+      ],
+      "product_type": [
+        "2"
+      ],
+      "status": [
+        "1",
+        "2"
+      ],
+      "created_at_start": "2026-11-01T00:00:00+08:00",
+      "created_at_end": "2026-11-18T23:59:59+08:00",
+      "order_id": "order-1",
+      "sort_by": "created_at",
+      "order": "asc"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "type": "Renewal",
+            "order_id": "xxxx",
+            "product": "Cloud phone",
+            "description": "xxxx",
+            "status": "Unpaid",
+            "total": "-$21.91",
+            "created_at": "2026-02-12T11:34:55+08:00",
+            "expired_at": "2026-02-12T12:04:55+08:00",
+            "expired_seconds": 1795
+          },
+          {
+            "type": "Purchase",
+            "order_id": "xxxx",
+            "product": "Cloud phone",
+            "description": "xxxx",
+            "status": "Finished",
+            "total": "-$0.80",
+            "created_at": "2026-02-13T14:09:55+08:00",
+            "expired_at": "",
+            "expired_seconds": 0
+          },
+          {
+            "type": "Purchase",
+            "order_id": "xxx",
+            "product": "云手机",
+            "description": "",
+            "status": "Cancelled",
+            "total": "-$21.91",
+            "created_at": "2026-03-10T16:49:55+08:00",
+            "expired_at": "",
+            "expired_seconds": 0
+          }
+        ],
+        "page": 1,
+        "pagesize": 200,
+        "total": 3,
+        "total_page": 1
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "Team.Balance",
+    "operation": "Team.Balance",
+    "path": "/api/v1/team/balance",
+    "source": "https://help.duoplus.net/docs/balance-inquiry",
+    "checked_at": "2026-10-23",
+    "request": {},
+    "response": {
+      "code": 200,
+      "data": {
+        "balance": {
+          "balance": "$73.00",
+          "recharge_balance": "$70.00",
+          "gift_balance": "$3.00"
+        }
+      },
+      "message": "Success"
+    },
+    "result": {
+      "balance": "$73.00",
+      "recharge_balance": "$70.00",
+      "gift_balance": "$3.00"
+    }
+  },
+  {
+    "name": "Team.Resources",
+    "operation": "Team.Resources",
+    "path": "/api/v1/team/resource",
+    "source": "https://help.duoplus.net/docs/Team-Resources",
+    "checked_at": "2026-10-23",
+    "request": {},
+    "response": {
+      "code": 200,
+      "data": {
+        "balance": 4.65,
+        "phone_count": 0,
+        "image_count": 10,
+        "paid_new_mock_times": 0
+      },
+      "message": "Success"
+    }
+  },
+  {
+    "name": "CloudPhones.SetADBIPWhitelist",
+    "operation": "CloudPhones.SetADBIPWhitelist",
+    "path": "/api/v1/cloudPhone/setAdbIpWhitelist",
+    "source": "https://help.duoplus.net/docs/adb-white-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "ips": [
+        "192.0.2.1"
+      ]
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "success"
+      },
+      "message": "success"
+    }
+  },
+  {
+    "name": "CloudPhones.AppendADBIPWhitelist",
+    "operation": "CloudPhones.AppendADBIPWhitelist",
+    "path": "/api/v1/cloudPhone/setAdbIpWhitelist",
+    "source": "https://help.duoplus.net/docs/adb-white-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "ips": [
+        "192.0.2.2"
+      ],
+      "append": true
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "message": "success"
+      },
+      "message": "success"
+    }
+  },
+  {
+    "name": "Team.Resources.numeric-string",
+    "operation": "Team.Resources",
+    "path": "/api/v1/team/resource",
+    "source": "https://help.duoplus.cn/docs/tuan-dui-zi-yuan",
+    "checked_at": "2026-10-23",
+    "request": {},
+    "response": {
+      "code": 200,
+      "data": {
+        "balance": "6789.52",
+        "phone_count": 27,
+        "image_count": 130,
+        "paid_new_mock_times": 209
+      },
+      "message": "Success"
+    },
+    "result": {
+      "balance": 6789.52,
+      "phone_count": 27,
+      "image_count": 130,
+      "paid_new_mock_times": 209
+    }
+  },
+  {
+    "name": "Proxies.List.no-status-filter",
+    "operation": "Proxies.List",
+    "path": "/api/v1/proxy/list",
+    "source": "https://help.duoplus.cn/docs/proxy-list",
+    "checked_at": "2026-10-23",
+    "request": {
+      "page": 1,
+      "pagesize": 100
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "list": [
+          {
+            "id": "xx",
+            "name": "xx",
+            "host": "127.0.0.1",
+            "port": "3001",
+            "user": "user",
+            "area": "US",
+            "group_ids": [
+              "xxxx",
+              "xxxx"
+            ],
+            "group_name": [
+              "xxxx",
+              "xxxx"
+            ]
+          }
+        ],
+        "page": 1,
+        "pagesize": 10,
+        "total": 1,
+        "total_page": 1
+      },
+      "message": "Success"
+    },
+    "notes": "The optional status filter is documented only in CN."
+  },
+  {
+    "name": "Proxies.Check.failed",
+    "operation": "Proxies.Check",
+    "path": "/api/v1/proxy/check",
+    "source": "https://help.duoplus.net/docs/Check-Proxy",
+    "checked_at": "2026-10-23",
+    "request": {
+      "proxy_id": "proxy-1"
+    },
+    "response": {
+      "code": 200,
+      "data": {
+        "success": false,
+        "ip": "",
+        "country": "",
+        "region": "",
+        "city": "",
+        "timezone": "",
+        "longitude": "",
+        "latitude": "",
+        "tips": "Connection test failed! Please ensure the proxy information is correct and the IP is available.",
+        "user": "xxxxx",
+        "password": "xxxxxx"
+      },
+      "message": "Success"
+    }
+  }
+]

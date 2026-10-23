@@ -2,6 +2,7 @@ package team
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/wyosa/duoplus-go-sdk/common"
 	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
@@ -21,25 +22,35 @@ func New(core *clientcore.Client) *Client {
 	return &Client{core: core}
 }
 
+// OrderListRequest allows at most 500 items per page.
 type OrderListRequest struct {
+	// CreatedAtStart and CreatedAtEnd: RFC 3339 with offset, e.g. 2026-01-01T00:00:00+08:00.
+	// Omitting both selects the last seven days in GMT+08:00.
 	CreatedAtStart string   `json:"created_at_start,omitempty"`
 	CreatedAtEnd   string   `json:"created_at_end,omitempty"`
 	ImageIDs       []string `json:"image_ids,omitempty"`
 	OrderID        string   `json:"order_id,omitempty"`
-	Status         []string `json:"status,omitempty"`
-	Type           []string `json:"type,omitempty"`
-	ProductType    []string `json:"product_type,omitempty"`
-	SortBy         string   `json:"sort_by,omitempty"`
-	Order          string   `json:"order,omitempty"`
+	// Status contains decimal strings: "1" (unpaid), "2" (canceled), "3" (paid), "4" (failed), "5"
+	// (finished), "6" (expired), or "7" (refunded).
+	Status []string `json:"status,omitempty"`
+	// Type uses decimal strings: 1 purchase, 2 renewal, 3 recharge, 4 deduction, 5 redeem, 6 gift,
+	// 7 refund, 8 transfer, or 9 receive.
+	Type        []string `json:"type,omitempty"`
+	ProductType []string `json:"product_type,omitempty"`
+	// SortBy is created_at or total.
+	SortBy string `json:"sort_by,omitempty"`
+	// Order is asc or desc.
+	Order string `json:"order,omitempty"`
 	common.PaginationRequest
 }
 
 type Order struct {
-	Type           string `json:"type"`
-	OrderID        string `json:"order_id"`
-	Product        string `json:"product"`
-	Description    string `json:"description"`
-	Status         string `json:"status"`
+	Type        string `json:"type"`
+	OrderID     string `json:"order_id"`
+	Product     string `json:"product"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
+	// Formatted currency amount, including its sign.
 	Total          string `json:"total"`
 	CreatedAt      string `json:"created_at"`
 	ExpiredAt      string `json:"expired_at"`
@@ -51,6 +62,7 @@ type OrderListResponse struct {
 	common.Pagination
 }
 
+// Balance contains currency-formatted strings.
 type Balance struct {
 	Balance         string `json:"balance"`
 	RechargeBalance string `json:"recharge_balance"`
@@ -62,10 +74,11 @@ type balanceResponse struct {
 }
 
 type Resources struct {
-	Balance          float64 `json:"balance"`
-	PhoneCount       int     `json:"phone_count"`
-	ImageCount       int     `json:"image_count"`
-	PaidNewMockTimes int     `json:"paid_new_mock_times"`
+	// Accepts a JSON number or numeric string without rounding.
+	Balance          json.Number `json:"balance"`
+	PhoneCount       int         `json:"phone_count"`
+	ImageCount       int         `json:"image_count"`
+	PaidNewMockTimes int         `json:"paid_new_mock_times"`
 }
 
 func (c *Client) Orders(ctx context.Context, req OrderListRequest) (*OrderListResponse, error) {
@@ -76,6 +89,7 @@ func (c *Client) Orders(ctx context.Context, req OrderListRequest) (*OrderListRe
 	return &resp, nil
 }
 
+// Balance contains currency-formatted strings.
 func (c *Client) Balance(ctx context.Context) (*Balance, error) {
 	var resp balanceResponse
 	if err := c.core.Do(ctx, pathBalance, nil, &resp); err != nil {

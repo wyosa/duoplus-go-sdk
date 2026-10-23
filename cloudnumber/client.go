@@ -29,16 +29,22 @@ func New(core *clientcore.Client) *Client {
 	return &Client{core: core}
 }
 
+// ListRequest allows at most 100 items per page.
 type ListRequest struct {
-	IDs           []string `json:"id,omitempty"`
-	PhoneNumber   string   `json:"phone_number,omitempty"`
-	Status        []int    `json:"status,omitempty"`
-	TypeIDs       []int    `json:"type_ids,omitempty"`
-	RegionIDs     []string `json:"region_ids,omitempty"`
-	RenewalStatus []int    `json:"renewal_status,omitempty"`
-	Remark        string   `json:"remark,omitempty"`
-	SortBy        string   `json:"sort_by,omitempty"`
-	Order         string   `json:"order,omitempty"`
+	IDs         []string `json:"id,omitempty"`
+	PhoneNumber string   `json:"phone_number,omitempty"`
+	// Status is 1 for active numbers or 2 for expired numbers.
+	Status []int `json:"status,omitempty"`
+	// TypeIDs uses 0 for VOIP and 1 for non-VOIP.
+	TypeIDs   []int    `json:"type_ids,omitempty"`
+	RegionIDs []string `json:"region_ids,omitempty"`
+	// RenewalStatus uses 0 for disabled or 1 for enabled.
+	RenewalStatus []int  `json:"renewal_status,omitempty"`
+	Remark        string `json:"remark,omitempty"`
+	// SortBy is created_at or expired_at.
+	SortBy string `json:"sort_by,omitempty"`
+	// Order is asc or desc.
+	Order string `json:"order,omitempty"`
 	common.PaginationRequest
 }
 
@@ -51,8 +57,9 @@ type Number struct {
 	RenewalStatus int    `json:"renewal_status"`
 	Assigned      bool   `json:"assigned"`
 	Remark        string `json:"remark"`
-	CreatedAt     string `json:"created_at"`
-	ExpiredAt     string `json:"expired_at"`
+	// CreatedAt and ExpiredAt use 2006-01-02 15:04:05 in GMT+08:00.
+	CreatedAt string `json:"created_at"`
+	ExpiredAt string `json:"expired_at"`
 }
 
 type ListResponse struct {
@@ -60,14 +67,16 @@ type ListResponse struct {
 	common.Pagination
 }
 
+// SMSListRequest allows at most 100 items per page.
 type SMSListRequest struct {
 	NumberID string `json:"number_id"`
 	common.PaginationRequest
 }
 
 type SMS struct {
-	Message    string `json:"message"`
-	Code       string `json:"code"`
+	Message string `json:"message"`
+	Code    string `json:"code"`
+	// ReceivedAt uses 2006-01-02 15:04:05 in GMT+08:00.
 	ReceivedAt string `json:"received_at"`
 }
 
@@ -76,6 +85,7 @@ type SMSListResponse struct {
 	common.Pagination
 }
 
+// WriteSMSRequest sends image_id as an array (EN); CN documents a string.
 type WriteSMSRequest struct {
 	ImageIDs []string  `json:"image_id"`
 	SMS      []SMSItem `json:"sms"`
@@ -87,6 +97,7 @@ type SMSItem struct {
 }
 
 type PackageCategory struct {
+	// Type is 0 for VOIP or 1 for non-VOIP.
 	Type    int              `json:"type"`
 	Name    string           `json:"name"`
 	Country []PackageCountry `json:"country"`
@@ -99,9 +110,12 @@ type PackageCountry struct {
 }
 
 type PackageDuration struct {
-	Name           string  `json:"name"`
-	Days           int     `json:"days"`
-	GifDays        int     `json:"gif_days"`
+	Name string `json:"name"`
+	// Duration in days, for PurchaseRequest.Duration.
+	Days int `json:"days"`
+	// Additional gifted days.
+	GifDays int `json:"gif_days"`
+	// Random gifted days, as a display string.
 	RandomGifDays  string  `json:"random_gif_days"`
 	IsSpecialOffer int     `json:"is_special_offer"`
 	Price          float64 `json:"price"`
@@ -111,20 +125,26 @@ type PackageDuration struct {
 
 type PackageDurationsRequest struct {
 	Region string `json:"region"`
-	Type   *int   `json:"type,omitempty"`
+	// Type is 0 for VOIP or 1 for non-VOIP; nil uses the server default of 1.
+	Type *int `json:"type,omitempty"`
 }
 
+// PackageDurationsResponse contains display labels; use PackageDuration.Days for purchases.
 type PackageDurationsResponse struct {
 	Duration []string `json:"duration"`
 }
 
 type PurchaseRequest struct {
-	Region        string `json:"region"`
-	Duration      int    `json:"duration"`
-	Type          *int   `json:"type,omitempty"`
-	Quantity      int    `json:"quantity,omitempty"`
-	CouponCode    string `json:"coupon_code,omitempty"`
-	RenewalStatus *int   `json:"renewal_status,omitempty"`
+	Region string `json:"region"`
+	// Duration is in days; obtain region-specific values from PurchasePackages.
+	Duration int `json:"duration"`
+	// Type is 0 for VOIP or 1 for non-VOIP; nil uses the server default of 1.
+	Type *int `json:"type,omitempty"`
+	// Quantity defaults to 1 when zero is omitted.
+	Quantity   int    `json:"quantity,omitempty"`
+	CouponCode string `json:"coupon_code,omitempty"`
+	// RenewalStatus is 0 for off or 1 for on; nil uses the server default of 1.
+	RenewalStatus *int `json:"renewal_status,omitempty"`
 }
 
 type RenewalPackagesRequest struct {
@@ -134,8 +154,10 @@ type RenewalPackagesRequest struct {
 type RenewalPackage struct {
 	ID          string `json:"id"`
 	PhoneNumber string `json:"phone_number"`
-	ExpiredAt   string `json:"expired_at"`
-	Duration    []int  `json:"duration"`
+	// ExpiredAt is a Unix timestamp in seconds encoded as a string.
+	ExpiredAt string `json:"expired_at"`
+	// Duration contains available renewal durations in days.
+	Duration []int `json:"duration"`
 }
 
 type RenewalPackagesResponse struct {
@@ -148,12 +170,14 @@ type RenewRequest struct {
 
 type RenewItem struct {
 	NumberIDs []string `json:"number_ids"`
-	Duration  int      `json:"duration"`
+	// Duration is in days; obtain supported values from RenewalPackages.
+	Duration int `json:"duration"`
 }
 
 type AutoRenewalRequest struct {
 	NumberIDs []string `json:"number_ids"`
-	Type      int      `json:"type"`
+	// Type is 0 for disabled or 1 for enabled.
+	Type int `json:"type"`
 }
 
 func (c *Client) List(ctx context.Context, req ListRequest) (*ListResponse, error) {
@@ -172,6 +196,7 @@ func (c *Client) SMSList(ctx context.Context, req SMSListRequest) (*SMSListRespo
 	return &resp, nil
 }
 
+// WriteSMS supports Android 12A, 15, and 15 Pro.
 func (c *Client) WriteSMS(ctx context.Context, req WriteSMSRequest) (*common.MessageResponse, error) {
 	var resp common.MessageResponse
 	if err := c.core.Do(ctx, pathWriteSMS, req, &resp); err != nil {

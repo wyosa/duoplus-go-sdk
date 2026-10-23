@@ -161,7 +161,10 @@ func TestNewValidatesBaseURL(t *testing.T) {
 		"openapi.duoplus.net",
 		"https://user:pass@openapi.duoplus.net",
 		"https://openapi.duoplus.net?x=1",
+		"https://openapi.duoplus.net?",
 		"https://openapi.duoplus.net#frag",
+		"https://openapi.duoplus.net#",
+		"https://:443",
 		"https://",
 	}
 	for _, in := range invalid {

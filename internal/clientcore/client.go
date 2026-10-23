@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -25,6 +26,7 @@ const (
 
 	maxResponseBytes  = 10 << 20
 	maxErrorBodyBytes = 4 << 10
+	maxErrorTextBytes = 4 << 10
 )
 
 type Config struct {
@@ -45,11 +47,16 @@ type Client struct {
 	nextRequest map[string]time.Time
 }
 
+// APIError reports a non-2xx HTTP status or non-200 API code.
 type APIError struct {
+	// HTTPStatus is the HTTP response status, independently of Code.
 	HTTPStatus int
-	Code       int
-	Message    string
-	Body       string
+	// Code is the DuoPlus envelope code, or zero when the envelope is unavailable.
+	Code int
+	// Message is the original, untruncated server message.
+	Message string
+	// Body contains at most the first 4 KiB of the raw response plus a truncation marker.
+	Body string
 }
 
 type envelope struct {
@@ -84,6 +91,7 @@ func New(apiKey string, cfg Config) (*Client, error) {
 	}, nil
 }
 
+// Error returns at most 4 KiB of valid UTF-8. Diagnostic fields are not changed or redacted.
 func (e *APIError) Error() string {
 	parts := make([]string, 0, 3)
 	if e.HTTPStatus > 0 {
@@ -101,7 +109,20 @@ func (e *APIError) Error() string {
 	if len(parts) == 0 {
 		return "duoplus api error"
 	}
-	return "duoplus api error: " + strings.Join(parts, ", ")
+	return limitErrorText("duoplus api error: " + strings.Join(parts, ", "))
+}
+
+func limitErrorText(text string) string {
+	text = strings.ToValidUTF8(text, "\uFFFD")
+	if len(text) <= maxErrorTextBytes {
+		return text
+	}
+	const suffix = "...(truncated)"
+	end := maxErrorTextBytes - len(suffix)
+	for !utf8.RuneStart(text[end]) {
+		end--
+	}
+	return text[:end] + suffix
 }
 
 func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) error {
@@ -109,7 +130,7 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 		ctx = context.Background()
 	}
 
-	if err := c.waitTurn(ctx, path); err != nil {
+	if err := ctx.Err(); err != nil {
 		return err
 	}
 
@@ -131,6 +152,12 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 	req.Header.Set("Lang", c.lang)
 	req.Header.Set("DuoPlus-API-Key", c.apiKey)
 
+	// Serialize and build the request before taking a turn: a slow Marshaler
+	// must not let a later request catch up with this one at the transport.
+	if err := c.waitTurn(ctx, path); err != nil {
+		return err
+	}
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("send request: %w", err)
@@ -145,15 +172,16 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 		return fmt.Errorf("read response: body exceeds %d bytes", maxResponseBytes)
 	}
 
+	httpSuccess := resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices
 	var apiResp envelope
 	if err := json.Unmarshal(body, &apiResp); err != nil {
-		if resp.StatusCode >= http.StatusBadRequest {
+		if !httpSuccess {
 			return &APIError{HTTPStatus: resp.StatusCode, Body: truncate(body)}
 		}
 		return fmt.Errorf("decode response: %w", err)
 	}
 
-	if resp.StatusCode >= http.StatusBadRequest || apiResp.Code != http.StatusOK {
+	if !httpSuccess || apiResp.Code != http.StatusOK {
 		return &APIError{
 			HTTPStatus: resp.StatusCode,
 			Code:       apiResp.Code,
@@ -213,13 +241,18 @@ func (c *Client) Upload(ctx context.Context, method, signedURL string, headers m
 		if errors.As(err, &urlErr) {
 			err = urlErr.Err
 		}
-		return fmt.Errorf("upload: %w", err)
+		// Redirect parsing and custom transports may also include URLs in
+		// their errors. Keep the cause available without printing credentials.
+		return &uploadRequestError{err: err}
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
 	if err != nil {
 		return fmt.Errorf("upload: read response: %w", err)
+	}
+	if len(respBody) > maxResponseBytes {
+		return fmt.Errorf("upload: read response: body exceeds %d bytes", maxResponseBytes)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		return &APIError{HTTPStatus: resp.StatusCode, Body: truncate(respBody)}
@@ -232,30 +265,39 @@ func (c *Client) Upload(ctx context.Context, method, signedURL string, headers m
 	return nil
 }
 
+type uploadRequestError struct {
+	err error
+}
+
+func (e *uploadRequestError) Error() string { return "upload: request failed" }
+func (e *uploadRequestError) Unwrap() error { return e.err }
+
 // waitTurn enforces the documented limit of 1 QPS per interface.
 func (c *Client) waitTurn(ctx context.Context, path string) error {
-	c.mu.Lock()
-	now := time.Now()
-	when := c.nextRequest[path]
-	if when.Before(now) {
-		when = now
-	}
-	c.nextRequest[path] = when.Add(c.minInterval)
-	c.mu.Unlock()
+	for {
+		c.mu.Lock()
+		if err := ctx.Err(); err != nil {
+			c.mu.Unlock()
+			return err
+		}
+		now := time.Now()
+		wait := c.nextRequest[path].Sub(now)
+		if wait <= 0 {
+			c.nextRequest[path] = now.Add(c.minInterval)
+			c.mu.Unlock()
+			return nil
+		}
+		c.mu.Unlock()
 
-	wait := time.Until(when)
-	if wait <= 0 {
-		return nil
-	}
-
-	timer := time.NewTimer(wait)
-	defer timer.Stop()
-
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
+		// Waiting callers do not reserve future slots. After waking, check
+		// again under the lock in case another caller took this turn.
+		timer := time.NewTimer(wait)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
 	}
 }
 
@@ -276,7 +318,7 @@ func normalizeBaseURL(raw string) (string, error) {
 	if u.User != nil {
 		return "", errors.New("invalid base url: credentials in url are not allowed")
 	}
-	if u.Host == "" || u.RawQuery != "" || u.Fragment != "" {
+	if u.Hostname() == "" || u.RawQuery != "" || u.ForceQuery || strings.Contains(raw, "#") {
 		return "", fmt.Errorf("invalid base url %q: expected scheme://host[/path]", raw)
 	}
 
@@ -310,8 +352,8 @@ func withoutRedirects(hc *http.Client) *http.Client {
 	} else {
 		c.Timeout = defaultTimeout
 	}
-	c.CheckRedirect = func(req *http.Request, _ []*http.Request) error {
-		return fmt.Errorf("refusing to follow redirect to %s", req.URL.Redacted())
+	c.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
+		return errors.New("refusing to follow redirect")
 	}
 	return &c
 }

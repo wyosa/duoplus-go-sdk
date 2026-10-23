@@ -1,14 +1,17 @@
 package common
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strconv"
-	"strings"
 )
 
 type PaginationRequest struct {
-	Page     int `json:"page,omitempty"`
+	// One-based; defaults to 1.
+	Page int `json:"page,omitempty"`
+	// Defaults to 10; maximum depends on the endpoint.
 	PageSize int `json:"pagesize,omitempty"`
 }
 
@@ -32,7 +35,9 @@ type IDResponse struct {
 	ID string `json:"id"`
 }
 
+// OperationResult may contain Fail entries even when the method returns no error.
 type OperationResult struct {
+	// Accepted IDs; asynchronous operations still need status polling.
 	Success    []string    `json:"success,omitempty"`
 	Fail       []string    `json:"fail,omitempty"`
 	FailReason FailReasons `json:"fail_reason,omitempty"`
@@ -44,13 +49,19 @@ type IDsOperationResponse struct {
 	Fail    []string `json:"fail"`
 }
 
-// FailReasons maps an ID to its failure reason. The API sometimes sends an
-// empty array instead of an empty object, so both are accepted.
+// FailReasons accepts an ID-to-message object, an empty array, or null.
 type FailReasons map[string]string
 
 func (f *FailReasons) UnmarshalJSON(data []byte) error {
-	trimmed := strings.TrimSpace(string(data))
-	if trimmed == "null" || trimmed == "[]" {
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) > 0 && trimmed[0] == '[' {
+		var items []json.RawMessage
+		if err := json.Unmarshal(trimmed, &items); err != nil {
+			return err
+		}
+		if len(items) != 0 {
+			return fmt.Errorf("fail reasons: expected an object or an empty array")
+		}
 		*f = nil
 		return nil
 	}
@@ -63,13 +74,11 @@ func (f *FailReasons) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Ptr returns a pointer to v, for optional request fields where the zero value
-// is meaningful (for example renewal_status=0).
+// Ptr supplies an explicit value for an optional field; nil omits it.
 func Ptr[T any](v T) *T {
 	return &v
 }
 
-// BoolToInt converts an on/off switch to the 1/0 value the API expects.
 func BoolToInt(v bool) int {
 	if v {
 		return 1
@@ -77,26 +86,33 @@ func BoolToInt(v bool) int {
 	return 0
 }
 
+// Text decodes strings, booleans, numbers, or null without rounding numeric values.
 type Text string
 
 func (t *Text) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		*t = ""
-		return nil
-	}
-
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
 	var value any
-	if err := json.Unmarshal(data, &value); err != nil {
+	if err := decoder.Decode(&value); err != nil {
 		return err
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("text: expected a single JSON value")
 	}
 
 	switch v := value.(type) {
 	case string:
 		*t = Text(v)
-	case float64:
-		*t = Text(strconv.FormatFloat(v, 'f', -1, 64))
+	case json.Number:
+		*t = Text(v.String())
 	case bool:
 		*t = Text(strconv.FormatBool(v))
+	case nil:
+		*t = ""
 	default:
 		return fmt.Errorf("unsupported text value type %T", value)
 	}

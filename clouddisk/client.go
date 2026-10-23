@@ -26,6 +26,7 @@ func New(core *clientcore.Client) *Client {
 	return &Client{core: core}
 }
 
+// ListRequest allows at most 100 items per page.
 type ListRequest struct {
 	Keyword string `json:"keyword,omitempty"`
 	common.PaginationRequest
@@ -45,9 +46,12 @@ type ListResponse struct {
 }
 
 type PushFilesRequest struct {
-	IDs      []string `json:"ids"`
+	// IDs contains at most 20 cloud drive file IDs.
+	IDs []string `json:"ids"`
+	// ImageIDs contains at most 20 target cloud phone IDs.
 	ImageIDs []string `json:"image_ids"`
-	DestDir  string   `json:"dest_dir"`
+	// DestDir is the required destination directory, such as /sdcard/Download.
+	DestDir string `json:"dest_dir"`
 }
 
 type PushFilesSuccess struct {
@@ -61,6 +65,7 @@ type PushFilesFailure struct {
 	Err     string `json:"err"`
 }
 
+// PushFilesResponse can contain Fail entries even when err is nil.
 type PushFilesResponse struct {
 	Message string             `json:"message"`
 	Success []PushFilesSuccess `json:"success"`
@@ -72,14 +77,19 @@ type DeleteRequest struct {
 }
 
 type SignedURLRequest struct {
-	Name  string `json:"name"`
-	IsApp int    `json:"is_app,omitempty"`
-	Pkg   string `json:"pkg,omitempty"`
+	// Name is required and includes the filename extension.
+	Name string `json:"name"`
+	// IsApp is 1 for an application upload; zero omits the field.
+	IsApp int `json:"is_app,omitempty"`
+	// Pkg is required when IsApp is 1.
+	Pkg string `json:"pkg,omitempty"`
 }
 
+// SignedURLResponse includes temporary upload credentials in SignedURL and Headers.
 type SignedURLResponse struct {
-	Method           string            `json:"method"`
-	SignedURL        string            `json:"signedUrl"`
+	Method    string `json:"method"`
+	SignedURL string `json:"signedUrl"`
+	// Forward to storage, including the callback headers.
 	Headers          map[string]string `json:"headers"`
 	Name             string            `json:"name"`
 	OriginalFileName string            `json:"original_file_name"`
@@ -117,7 +127,8 @@ func (c *Client) SignedURL(ctx context.Context, req SignedURLRequest) (*SignedUR
 	return &resp, nil
 }
 
-// Upload requests a presigned URL and uploads size bytes from body to it.
+// Upload sends exactly size bytes from body. The storage request has no API key
+// and no HTTP client timeout; set a context deadline.
 func (c *Client) Upload(ctx context.Context, req SignedURLRequest, body io.Reader, size int64) (*SignedURLResponse, error) {
 	signed, err := c.SignedURL(ctx, req)
 	if err != nil {
@@ -129,7 +140,7 @@ func (c *Client) Upload(ctx context.Context, req SignedURLRequest, body io.Reade
 	return signed, nil
 }
 
-// UploadFile uploads a local file; req.Name defaults to the file's base name.
+// UploadFile defaults req.Name to the file's base name. Set a context deadline for the upload.
 func (c *Client) UploadFile(ctx context.Context, path string, req SignedURLRequest) (*SignedURLResponse, error) {
 	f, err := os.Open(path)
 	if err != nil {
