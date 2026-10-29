@@ -1,3 +1,4 @@
+// Package subscriptionstartup lists, purchases, and renews subscription startups.
 package subscriptionstartup
 
 import (

@@ -1,3 +1,4 @@
+// Command group-disk counts cloud phone groups and cloud drive files.
 package main
 
 import (

@@ -1,3 +1,4 @@
+// Command power-on-wait powers on a cloud phone and waits until it is on.
 package main
 
 import (

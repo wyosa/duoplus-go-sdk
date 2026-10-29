@@ -1,3 +1,4 @@
+// Package automation manages automation templates, scheduled tasks, and loop tasks.
 package automation
 
 import (

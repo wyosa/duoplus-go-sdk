@@ -62,6 +62,8 @@ go run ./examples/basic
 
 The last three examples require `DUOPLUS_EXECUTE=1` to make changes.
 Use `DUOPLUS_TARGET_IMAGE_ID` to select a phone in the power-on examples.
+Temporary startup is billed until the phone is powered off; the examples do not power phones off.
+`power-on-adb-check` also reads `DUOPLUS_ADB_COMMAND` and `DUOPLUS_EXPECT_SUBSTRING`; `real-workflow` reads `DUOPLUS_DEST_DIR`.
 
 ## API coverage
 

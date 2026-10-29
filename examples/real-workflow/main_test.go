@@ -25,6 +25,7 @@ func TestWorkflowChecksReadinessAndPushResult(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Setenv("DUOPLUS_EXECUTE", "1")
+			t.Setenv("DUOPLUS_TARGET_IMAGE_ID", "")
 			var statusChecked, pushed atomic.Bool
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				data := `{}`
@@ -64,6 +65,7 @@ func TestWorkflowChecksReadinessAndPushResult(t *testing.T) {
 
 func TestWorkflowDryRunDoesNotChangeResources(t *testing.T) {
 	t.Setenv("DUOPLUS_EXECUTE", "")
+	t.Setenv("DUOPLUS_TARGET_IMAGE_ID", "")
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/api/v1/cloudPhone/list":

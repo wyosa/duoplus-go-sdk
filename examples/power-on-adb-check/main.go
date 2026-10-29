@@ -1,3 +1,4 @@
+// Command power-on-adb-check powers on a cloud phone and checks the output of an ADB command.
 package main
 
 import (

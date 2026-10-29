@@ -105,23 +105,43 @@ func TestUploadFileRejectsLocalErrorsBeforeCallingAPI(t *testing.T) {
 }
 
 func TestUploadPropagatesStorageCallbackFailure(t *testing.T) {
-	var srv *httptest.Server
-	srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/v1/cloudDisk/signedUrl" {
-			fmt.Fprintf(w, `{"code":200,"data":{"method":"PUT","signedUrl":%q,"headers":{}}}`, srv.URL+"/storage")
-			return
-		}
-		io.Copy(io.Discard, r.Body)
-		fmt.Fprint(w, `{"code":500,"message":"callback failed"}`)
-	}))
-	defer srv.Close()
-	client, err := duoplus.NewClient("fixture-key", duoplus.WithBaseURL(srv.URL))
-	if err != nil {
-		t.Fatal(err)
-	}
-	result, err := client.CloudDisk.Upload(context.Background(), clouddisk.SignedURLRequest{Name: "a.txt"}, strings.NewReader("x"), 1)
-	var apiErr *duoplus.APIError
-	if result != nil || !errors.As(err, &apiErr) || apiErr.Code != 500 || apiErr.Message != "callback failed" {
-		t.Fatalf("lost callback failure: %v", err)
+	for _, tc := range []struct {
+		name    string
+		status  int
+		body    string
+		code    int
+		message string
+	}{
+		{"callback error", http.StatusOK, `{"code":500,"message":"callback failed"}`, 500, "callback failed"},
+		// OSS keeps the object but reports a failed callback with 203.
+		{"oss callback failure", http.StatusNonAuthoritativeInfo,
+			`<?xml version="1.0" encoding="UTF-8"?><Error><Code>CallbackFailed</Code><Message>Error status : 502.</Message></Error>`,
+			0, "CallbackFailed: Error status : 502."},
+		{"oss error", http.StatusForbidden,
+			`<?xml version="1.0" encoding="UTF-8"?><Error><Code>SignatureDoesNotMatch</Code><Message>The request signature does not match.</Message></Error>`,
+			0, "SignatureDoesNotMatch: The request signature does not match."},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var srv *httptest.Server
+			srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/api/v1/cloudDisk/signedUrl" {
+					fmt.Fprintf(w, `{"code":200,"data":{"method":"PUT","signedUrl":%q,"headers":{}}}`, srv.URL+"/storage")
+					return
+				}
+				io.Copy(io.Discard, r.Body)
+				w.WriteHeader(tc.status)
+				fmt.Fprint(w, tc.body)
+			}))
+			defer srv.Close()
+			client, err := duoplus.NewClient("fixture-key", duoplus.WithBaseURL(srv.URL))
+			if err != nil {
+				t.Fatal(err)
+			}
+			result, err := client.CloudDisk.Upload(context.Background(), clouddisk.SignedURLRequest{Name: "a.txt"}, strings.NewReader("x"), 1)
+			var apiErr *duoplus.APIError
+			if result != nil || !errors.As(err, &apiErr) || apiErr.HTTPStatus != tc.status || apiErr.Code != tc.code || apiErr.Message != tc.message {
+				t.Fatalf("lost storage failure: %v", err)
+			}
+		})
 	}
 }

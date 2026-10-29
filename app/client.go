@@ -1,3 +1,4 @@
+// Package app lists, installs, starts, and stops apps on cloud phones.
 package app
 
 import (

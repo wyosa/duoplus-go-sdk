@@ -1,3 +1,4 @@
+// Package cloudphone manages cloud phone lifecycle, configuration, ADB, sharing, and billing.
 package cloudphone
 
 import (
@@ -316,8 +317,8 @@ type BatchRootRequest struct {
 	ImageIDs []string `json:"image_ids"`
 	// Status is 1 (enable all), 2 (disable all), 3 (enable packages), or 4 (disable packages).
 	Status int `json:"status"`
-	// Required for Status 3 or 4. EN uses pkgs; CN uses packages.
-	Packages []string `json:"pkgs,omitempty"`
+	// Required for Status 3 or 4. Sent as packages from both request examples, despite the EN table's pkgs.
+	Packages []string `json:"packages,omitempty"`
 }
 
 type CommandRequest struct {

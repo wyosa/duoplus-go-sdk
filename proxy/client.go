@@ -1,3 +1,4 @@
+// Package proxy manages, checks, and renews proxies.
 package proxy
 
 import (
@@ -121,16 +122,18 @@ type AutoRenewalRequest struct {
 	Type int `json:"type"`
 }
 
-// UpdateRequest leaves nil fields unchanged; common.Ptr("") clears a string.
+// UpdateRequest omits nil fields; common.Ptr("") clears a string. The API documents socks5 and
+// ip2location for an omitted Protocol and IPScanChannel; set both when the proxy uses other values.
 type UpdateRequest struct {
 	ID string `json:"id"`
-	// Protocol is socks5, http, or https; nil leaves it unchanged.
-	Protocol      *string `json:"protocol,omitempty"`
-	Host          *string `json:"host,omitempty"`
-	Port          int     `json:"port,omitempty"`
-	User          *string `json:"user,omitempty"`
-	Password      *string `json:"password,omitempty"`
-	Name          *string `json:"name,omitempty"`
+	// Protocol is socks5, http, or https; the API documents socks5 when it is omitted.
+	Protocol *string `json:"protocol,omitempty"`
+	Host     *string `json:"host,omitempty"`
+	Port     int     `json:"port,omitempty"`
+	User     *string `json:"user,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	// IPScanChannel is ip2location or ipapi; the API documents ip2location when it is omitted.
 	IPScanChannel *string `json:"ip_scan_channel,omitempty"`
 	RefreshURL    *string `json:"refresh_url,omitempty"`
 	ProxyURL      *string `json:"proxy_url,omitempty"`
@@ -138,7 +141,8 @@ type UpdateRequest struct {
 
 type UpdateResponse struct {
 	Message string `json:"message"`
-	Result  []any  `json:"result"`
+	// Result is undocumented; the published example is an empty array.
+	Result any `json:"result"`
 }
 
 func (c *Client) List(ctx context.Context, req ListRequest) (*ListResponse, error) {

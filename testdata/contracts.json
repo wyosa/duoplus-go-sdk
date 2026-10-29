@@ -497,13 +497,13 @@
     "operation": "CloudPhones.BatchRoot",
     "path": "/api/v1/cloudPhone/batchRoot",
     "source": "https://help.duoplus.net/docs/Batch-Set-Root",
-    "checked_at": "2026-10-23",
+    "checked_at": "2026-10-29",
     "request": {
       "image_ids": [
         "phone-1"
       ],
       "status": 3,
-      "pkgs": [
+      "packages": [
         "com.example.app"
       ]
     },
@@ -522,7 +522,7 @@
       },
       "message": "Success"
     },
-    "notes": "The docs print a keyed fail_reason inside square brackets, which is invalid JSON; represented as an object, consistent with the other batch endpoints."
+    "notes": "Use packages from both language examples and the CN parameter table; the EN table instead says pkgs. The docs print a keyed fail_reason inside square brackets, which is invalid JSON; represented as an object, consistent with the other batch endpoints."
   },
   {
     "name": "CloudPhones.Command",
@@ -1178,11 +1178,9 @@
     "operation": "CloudNumbers.WriteSMS",
     "path": "/api/v1/cloudNumber/imageWriteSms",
     "source": "https://help.duoplus.net/docs/write-sms-to-cloud-phone",
-    "checked_at": "2026-10-23",
+    "checked_at": "2026-10-29",
     "request": {
-      "image_id": [
-        "phone-1"
-      ],
+      "image_id": "phone-1",
       "sms": [
         {
           "phone": "+15056447080",
@@ -1196,7 +1194,8 @@
         "message": "success"
       },
       "message": "success"
-    }
+    },
+    "notes": "Send image_id as a string from both language examples and the CN parameter table; the EN table instead says array."
   },
   {
     "name": "CloudNumbers.PurchasePackages",
@@ -2990,7 +2989,14 @@
         "paid_new_mock_times": 0
       },
       "message": "Success"
-    }
+    },
+    "result": {
+      "balance": "4.65",
+      "phone_count": 0,
+      "image_count": 10,
+      "paid_new_mock_times": 0
+    },
+    "notes": "Balance keeps the exact decimal text of a JSON number or string."
   },
   {
     "name": "CloudPhones.SetADBIPWhitelist",
@@ -3047,12 +3053,6 @@
         "paid_new_mock_times": 209
       },
       "message": "Success"
-    },
-    "result": {
-      "balance": 6789.52,
-      "phone_count": 27,
-      "image_count": 130,
-      "paid_new_mock_times": 209
     }
   },
   {

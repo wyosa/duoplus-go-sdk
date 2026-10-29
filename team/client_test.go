@@ -8,13 +8,18 @@ import (
 )
 
 func TestResourcesBalancePreservesDecimalPrecision(t *testing.T) {
-	for _, input := range []string{`9007199254740993.01`, `"9007199254740993.01"`} {
+	for input, want := range map[string]string{
+		`9007199254740993.01`:   "9007199254740993.01",
+		`"9007199254740993.01"`: "9007199254740993.01",
+		`""`:                    "",
+		`null`:                  "",
+	} {
 		var result team.Resources
 		if err := json.Unmarshal([]byte(`{"balance":`+input+`}`), &result); err != nil {
-			t.Fatal(err)
+			t.Fatalf("%s: %v", input, err)
 		}
-		if result.Balance.String() != "9007199254740993.01" {
-			t.Fatalf("balance rounded to %s", result.Balance)
+		if string(result.Balance) != want {
+			t.Fatalf("%s: balance = %q, want %q", input, result.Balance, want)
 		}
 	}
 }

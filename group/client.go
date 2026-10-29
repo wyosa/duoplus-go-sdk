@@ -1,3 +1,4 @@
+// Package group manages cloud phone groups.
 package group
 
 import (

@@ -1,3 +1,4 @@
+// Command basic lists the first page of cloud phones.
 package main
 
 import (

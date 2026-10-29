@@ -1,8 +1,8 @@
+// Package team reads team orders, balance, and resources.
 package team
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/wyosa/duoplus-go-sdk/common"
 	"github.com/wyosa/duoplus-go-sdk/internal/clientcore"
@@ -74,8 +74,8 @@ type balanceResponse struct {
 }
 
 type Resources struct {
-	// Accepts a JSON number or numeric string without rounding.
-	Balance          json.Number `json:"balance"`
+	// Balance keeps the exact decimal text of a JSON number or string.
+	Balance          common.Text `json:"balance"`
 	PhoneCount       int         `json:"phone_count"`
 	ImageCount       int         `json:"image_count"`
 	PaidNewMockTimes int         `json:"paid_new_mock_times"`

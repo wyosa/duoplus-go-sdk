@@ -105,8 +105,8 @@ func ExampleClient_resources() {
 	if err != nil {
 		panic(err)
 	}
-	// String preserves the decimal value; Float64 may lose precision.
-	fmt.Println(resources.Balance.String())
+	// Balance keeps the exact decimal text; parsing it as float64 may lose precision.
+	fmt.Println(resources.Balance)
 	// Output: 9007199254740993.01
 }
 

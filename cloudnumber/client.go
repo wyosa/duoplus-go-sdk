@@ -1,3 +1,4 @@
+// Package cloudnumber manages cloud numbers, their SMS, purchases, and renewals.
 package cloudnumber
 
 import (
@@ -85,10 +86,10 @@ type SMSListResponse struct {
 	common.Pagination
 }
 
-// WriteSMSRequest sends image_id as an array (EN); CN documents a string.
+// WriteSMSRequest sends image_id as a string from both request examples, despite the EN table's array.
 type WriteSMSRequest struct {
-	ImageIDs []string  `json:"image_id"`
-	SMS      []SMSItem `json:"sms"`
+	ImageID string    `json:"image_id"`
+	SMS     []SMSItem `json:"sms"`
 }
 
 type SMSItem struct {
@@ -115,12 +116,12 @@ type PackageDuration struct {
 	Days int `json:"days"`
 	// Additional gifted days.
 	GifDays int `json:"gif_days"`
-	// Random gifted days, as a display string.
-	RandomGifDays  string  `json:"random_gif_days"`
-	IsSpecialOffer int     `json:"is_special_offer"`
-	Price          float64 `json:"price"`
-	CardPrice      float64 `json:"card_price"`
-	TotalPrice     float64 `json:"total_price"`
+	// Random gifted days, such as 25-50; numeric JSON is accepted too.
+	RandomGifDays  common.Text `json:"random_gif_days"`
+	IsSpecialOffer int         `json:"is_special_offer"`
+	Price          float64     `json:"price"`
+	CardPrice      float64     `json:"card_price"`
+	TotalPrice     float64     `json:"total_price"`
 }
 
 type PackageDurationsRequest struct {

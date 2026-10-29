@@ -212,22 +212,22 @@ func TestRequestBodies(t *testing.T) {
 			want: `{"image_id":"p1"}`,
 		},
 		{
-			name: "batch root uses EN field name",
+			name: "batch root follows both request examples",
 			call: func(c *Client) error {
 				_, err := c.CloudPhones.BatchRoot(ctx, cloudphone.BatchRootRequest{ImageIDs: []string{"p1"}, Status: 3, Packages: []string{"com.a"}})
 				return err
 			},
 			path: "/api/v1/cloudPhone/batchRoot",
-			want: `{"image_ids":["p1"],"status":3,"pkgs":["com.a"]}`,
+			want: `{"image_ids":["p1"],"status":3,"packages":["com.a"]}`,
 		},
 		{
-			name: "write sms sends image_id as array",
+			name: "write sms sends image_id as string",
 			call: func(c *Client) error {
-				_, err := c.CloudNumbers.WriteSMS(ctx, cloudnumber.WriteSMSRequest{ImageIDs: []string{"p1"}, SMS: []cloudnumber.SMSItem{{Phone: "+1", Message: "hi"}}})
+				_, err := c.CloudNumbers.WriteSMS(ctx, cloudnumber.WriteSMSRequest{ImageID: "p1", SMS: []cloudnumber.SMSItem{{Phone: "+1", Message: "hi"}}})
 				return err
 			},
 			path: "/api/v1/cloudNumber/imageWriteSms",
-			want: `{"image_id":["p1"],"sms":[{"phone":"+1","message":"hi"}]}`,
+			want: `{"image_id":"p1","sms":[{"phone":"+1","message":"hi"}]}`,
 		},
 		{
 			name: "init proxy",
@@ -558,6 +558,25 @@ func TestArrayDataResponses(t *testing.T) {
 	}
 	if d := pkgs[0].Country[0].Durations[0]; d.Days != 30 || d.RandomGifDays != "25-50" || d.TotalPrice != 4.9 {
 		t.Fatalf("unexpected packages %+v", pkgs)
+	}
+
+	// The API sends [] for some empty objects.
+	client, _ = newRecordingClient(t, `[]`)
+	models, err := client.CloudPhones.Models(ctx, cloudphone.ModelListRequest{OS: 1})
+	if err != nil {
+		t.Fatalf("Models() error = %v", err)
+	}
+	if len(models) != 0 {
+		t.Fatalf("unexpected models %+v", models)
+	}
+
+	client, _ = newRecordingClient(t, `{"id":"p1","proxy":[],"device":[],"group":[]}`)
+	detail, err := client.CloudPhones.Info(ctx, "p1")
+	if err != nil {
+		t.Fatalf("Info() error = %v", err)
+	}
+	if detail.ID != "p1" || detail.Proxy.ID != "" {
+		t.Fatalf("unexpected detail %+v", detail)
 	}
 }
 

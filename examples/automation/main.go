@@ -1,3 +1,4 @@
+// Command automation lists the first page of official automation templates.
 package main
 
 import (

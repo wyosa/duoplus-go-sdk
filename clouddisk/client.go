@@ -1,3 +1,4 @@
+// Package clouddisk lists, uploads, pushes, and deletes cloud drive files.
 package clouddisk
 
 import (

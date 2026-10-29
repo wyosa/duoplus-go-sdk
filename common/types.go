@@ -1,3 +1,4 @@
+// Package common holds request and response types shared by the service packages.
 package common
 
 import (

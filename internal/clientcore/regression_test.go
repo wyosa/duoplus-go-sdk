@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -141,6 +143,140 @@ func TestDoRejectsNonSuccessHTTPStatus(t *testing.T) {
 			var apiErr *APIError
 			if !errors.As(err, &apiErr) || apiErr.HTTPStatus != tc.status {
 				t.Fatalf("expected HTTP %d error, got %v", tc.status, err)
+			}
+		})
+	}
+}
+
+type embeddedInfo struct {
+	Info map[string]string `json:"info"`
+}
+
+func TestDoAcceptsEmptyArraysForObjects(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		data := map[string]string{
+			"/top":    `[ ]`,
+			"/nested": `{"id":"p1","proxy":[],"headers":[],"info":[],"list":[[],{"extra":[],"tags":[]}]}`,
+			"/other":  `{"proxy":[],"count":"x"}`,
+			"/items":  `[1]`,
+		}[r.URL.Path]
+		io.WriteString(w, `{"code":200,"data":`+data+`}`)
+	}))
+	defer srv.Close()
+	c := newTestClient(t, srv.URL, time.Nanosecond)
+	ctx := context.Background()
+
+	var object struct {
+		ID string `json:"id"`
+	}
+	values := map[string]string{}
+	var list []string
+	for _, out := range []any{&object, &values, &list} {
+		if err := c.Do(ctx, "/top", nil, out); err != nil {
+			t.Fatalf("%T: %v", out, err)
+		}
+	}
+
+	var nested struct {
+		embeddedInfo
+		ID    string `json:"id"`
+		Proxy struct {
+			Host string `json:"host"`
+		} `json:"proxy"`
+		Headers map[string]string `json:"headers"`
+		List    []struct {
+			Extra map[string]any `json:"extra"`
+			Tags  []string       `json:"tags"`
+		} `json:"list"`
+	}
+	if err := c.Do(ctx, "/nested", nil, &nested); err != nil {
+		t.Fatalf("nested empty arrays: %v", err)
+	}
+	if nested.ID != "p1" || len(nested.List) != 2 || nested.List[1].Tags == nil {
+		t.Fatalf("lost decoded fields: %+v", nested)
+	}
+
+	var other struct {
+		Proxy struct{} `json:"proxy"`
+		Count int      `json:"count"`
+	}
+	var number int
+	for path, out := range map[string]any{"/other": &other, "/items": &object, "/top": &number} {
+		if err := c.Do(ctx, path, nil, out); err == nil {
+			t.Errorf("%s: decoded a mismatched value into %T", path, out)
+		}
+	}
+}
+
+func TestRateLimitCountsFromWrittenRequest(t *testing.T) {
+	const interval = 300 * time.Millisecond
+	arrivals := make(chan time.Time, 2)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		arrivals <- time.Now()
+		io.WriteString(w, `{"code":200,"data":{}}`)
+	}))
+	defer srv.Close()
+	var dialer net.Dialer
+	transport := &http.Transport{DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+		// Slow connection setup delays when the first request reaches the server.
+		time.Sleep(interval / 2)
+		return dialer.DialContext(ctx, network, addr)
+	}}
+	defer transport.CloseIdleConnections()
+	c, err := New("key", Config{BaseURL: srv.URL, MinInterval: interval, HTTPClient: &http.Client{Transport: transport}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 2; i++ {
+		if err := c.Do(context.Background(), "/a", nil, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	first, second := <-arrivals, <-arrivals
+	if gap := second.Sub(first); gap < interval*9/10 {
+		t.Fatalf("server saw requests %v apart, interval is %v", gap, interval)
+	}
+}
+
+func TestDoRetriesRateLimitedRequests(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		status     int
+		body       string
+		retryAfter string
+		limited    int32
+		calls      int32
+	}{
+		{"http status", http.StatusTooManyRequests, `{"message":"Too Many Attempts."}`, "0", 2, 3},
+		{"api code", http.StatusOK, `{"code":429,"message":"too frequent"}`, "", 2, 3},
+		{"gives up", http.StatusTooManyRequests, `{"code":429,"message":"too frequent"}`, "", 3, 3},
+		{"long retry-after", http.StatusTooManyRequests, `{"code":429,"message":"too frequent"}`, "3600", 1, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var calls atomic.Int32
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				if calls.Add(1) <= tc.limited {
+					if tc.retryAfter != "" {
+						w.Header().Set("Retry-After", tc.retryAfter)
+					}
+					w.WriteHeader(tc.status)
+					io.WriteString(w, tc.body)
+					return
+				}
+				io.WriteString(w, `{"code":200,"data":{}}`)
+			}))
+			defer srv.Close()
+			err := newTestClient(t, srv.URL, time.Nanosecond).Do(context.Background(), "/a", nil, nil)
+			if calls.Load() != tc.calls {
+				t.Fatalf("sent %d requests, want %d", calls.Load(), tc.calls)
+			}
+			var apiErr *APIError
+			if tc.limited < tc.calls {
+				if err != nil {
+					t.Fatalf("retry failed: %v", err)
+				}
+			} else if !errors.As(err, &apiErr) || apiErr.HTTPStatus != http.StatusTooManyRequests {
+				t.Fatalf("expected the rate-limit error, got %v", err)
 			}
 		})
 	}

@@ -1,15 +1,20 @@
+// Package clientcore sends rate-limited API requests and storage uploads.
 package clientcore
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"net/http/httptrace"
 	"net/url"
+	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -27,6 +32,10 @@ const (
 	maxResponseBytes  = 10 << 20
 	maxErrorBodyBytes = 4 << 10
 	maxErrorTextBytes = 4 << 10
+
+	// A rate-limited request was not processed, so retrying it is safe.
+	maxRateLimitRetries = 2
+	maxRetryAfter       = time.Minute
 )
 
 type Config struct {
@@ -43,8 +52,16 @@ type Client struct {
 	httpClient  *http.Client
 	minInterval time.Duration
 
-	mu          sync.Mutex
-	nextRequest map[string]time.Time
+	mu        sync.Mutex
+	endpoints map[string]*endpoint
+}
+
+// endpoint paces the requests to one API path.
+type endpoint struct {
+	// next is the earliest start of the next request.
+	next time.Time
+	// sending is closed once the current request is written or fails; nil when idle.
+	sending chan struct{}
 }
 
 // APIError reports a non-2xx HTTP status or non-200 API code.
@@ -87,7 +104,7 @@ func New(apiKey string, cfg Config) (*Client, error) {
 		lang:        lang,
 		httpClient:  withoutRedirects(cfg.HTTPClient),
 		minInterval: minInterval,
-		nextRequest: map[string]time.Time{},
+		endpoints:   map[string]*endpoint{},
 	}, nil
 }
 
@@ -125,6 +142,7 @@ func limitErrorText(text string) string {
 	return text[:end] + suffix
 }
 
+// Do retries only rate-limited requests (HTTP or API code 429), at most twice.
 func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) error {
 	if ctx == nil {
 		ctx = context.Background()
@@ -134,6 +152,8 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 		return err
 	}
 
+	// Serialize before taking a turn: a slow Marshaler must not let a later
+	// request catch up with this one at the transport.
 	payload := []byte("{}")
 	if requestBody != nil {
 		var err error
@@ -143,47 +163,41 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+path, bytes.NewReader(payload))
-	if err != nil {
-		return fmt.Errorf("build request: %w", err)
+	var (
+		status int
+		header http.Header
+		body   []byte
+	)
+	for retries := 0; ; retries++ {
+		var err error
+		status, header, body, err = c.send(ctx, path, payload)
+		if err != nil {
+			return err
+		}
+		if retries == maxRateLimitRetries || !rateLimited(status, body) {
+			break
+		}
+		delay, ok := retryAfter(header.Get("Retry-After"))
+		if !ok {
+			break
+		}
+		if err := sleep(ctx, delay); err != nil {
+			return err
+		}
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Lang", c.lang)
-	req.Header.Set("DuoPlus-API-Key", c.apiKey)
-
-	// Serialize and build the request before taking a turn: a slow Marshaler
-	// must not let a later request catch up with this one at the transport.
-	if err := c.waitTurn(ctx, path); err != nil {
-		return err
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
-	if err != nil {
-		return fmt.Errorf("read response: %w", err)
-	}
-	if len(body) > maxResponseBytes {
-		return fmt.Errorf("read response: body exceeds %d bytes", maxResponseBytes)
-	}
-
-	httpSuccess := resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices
+	httpSuccess := status >= http.StatusOK && status < http.StatusMultipleChoices
 	var apiResp envelope
 	if err := json.Unmarshal(body, &apiResp); err != nil {
 		if !httpSuccess {
-			return &APIError{HTTPStatus: resp.StatusCode, Body: truncate(body)}
+			return &APIError{HTTPStatus: status, Body: truncate(body)}
 		}
 		return fmt.Errorf("decode response: %w", err)
 	}
 
 	if !httpSuccess || apiResp.Code != http.StatusOK {
 		return &APIError{
-			HTTPStatus: resp.StatusCode,
+			HTTPStatus: status,
 			Code:       apiResp.Code,
 			Message:    apiResp.Message,
 			Body:       truncate(body),
@@ -194,11 +208,188 @@ func (c *Client) Do(ctx context.Context, path string, requestBody any, out any) 
 		return nil
 	}
 
-	if err := json.Unmarshal(apiResp.Data, out); err != nil {
+	if err := decodeData(apiResp.Data, out); err != nil {
 		return fmt.Errorf("decode data: %w", err)
 	}
 
 	return nil
+}
+
+// send makes one request when the endpoint allows it and returns the response
+// status, header, and body.
+func (c *Client) send(ctx context.Context, path string, payload []byte) (int, http.Header, []byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+path, bytes.NewReader(payload))
+	if err != nil {
+		return 0, nil, nil, fmt.Errorf("build request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Lang", c.lang)
+	req.Header.Set("DuoPlus-API-Key", c.apiKey)
+
+	written, err := c.waitTurn(ctx, path)
+	if err != nil {
+		return 0, nil, nil, err
+	}
+	trace := &httptrace.ClientTrace{WroteRequest: func(info httptrace.WroteRequestInfo) {
+		if info.Err == nil {
+			written()
+		}
+	}}
+	resp, err := c.httpClient.Do(req.WithContext(httptrace.WithClientTrace(ctx, trace)))
+	// Custom transports may not report the write, and failed requests end the turn too.
+	written()
+	if err != nil {
+		return 0, nil, nil, fmt.Errorf("send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
+	if err != nil {
+		return 0, nil, nil, fmt.Errorf("read response: %w", err)
+	}
+	if len(body) > maxResponseBytes {
+		return 0, nil, nil, fmt.Errorf("read response: body exceeds %d bytes", maxResponseBytes)
+	}
+	return resp.StatusCode, resp.Header, body, nil
+}
+
+// rateLimited reports an HTTP or API code 429.
+func rateLimited(status int, body []byte) bool {
+	var apiResp struct {
+		Code int `json:"code"`
+	}
+	return status == http.StatusTooManyRequests ||
+		json.Unmarshal(body, &apiResp) == nil && apiResp.Code == http.StatusTooManyRequests
+}
+
+// retryAfter parses a Retry-After value in seconds or as an HTTP date. It
+// reports false when the server asks to wait longer than maxRetryAfter.
+func retryAfter(value string) (time.Duration, bool) {
+	value = strings.TrimSpace(value)
+	var delay time.Duration
+	if seconds, err := strconv.Atoi(value); err == nil {
+		if seconds > int(maxRetryAfter/time.Second) {
+			return 0, false
+		}
+		delay = time.Duration(seconds) * time.Second
+	} else if date, err := http.ParseTime(value); err == nil {
+		delay = time.Until(date)
+	}
+	return delay, delay <= maxRetryAfter
+}
+
+// decodeData decodes data into out. The API sends [] for some empty objects,
+// so when decoding fails on an array, the empty arrays that out decodes as
+// maps or structs are replaced with {} and decoding is retried.
+func decodeData(data []byte, out any) error {
+	err := json.Unmarshal(data, out)
+	var typeErr *json.UnmarshalTypeError
+	if !errors.As(err, &typeErr) || typeErr.Value != "array" {
+		return err
+	}
+	target := reflect.ValueOf(out)
+	if target.Kind() != reflect.Pointer || target.IsNil() {
+		return err
+	}
+
+	var value any
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
+	if decoder.Decode(&value) != nil {
+		return err
+	}
+	value, replaced := emptyObjects(value, target.Type().Elem())
+	if !replaced {
+		return err
+	}
+	normalized, marshalErr := json.Marshal(value)
+	if marshalErr != nil {
+		return err
+	}
+
+	fresh := reflect.New(target.Type().Elem())
+	if err := json.Unmarshal(normalized, fresh.Interface()); err != nil {
+		return err
+	}
+	target.Elem().Set(fresh.Elem())
+	return nil
+}
+
+var unmarshalerType = reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()
+
+// emptyObjects replaces each empty array in v that t decodes as a map or a
+// struct with an empty object. Types with their own UnmarshalJSON are skipped.
+func emptyObjects(v any, t reflect.Type) (any, bool) {
+	for t.Kind() == reflect.Pointer {
+		t = t.Elem()
+	}
+	if reflect.PointerTo(t).Implements(unmarshalerType) {
+		return v, false
+	}
+
+	replaced := false
+	switch v := v.(type) {
+	case []any:
+		switch t.Kind() {
+		case reflect.Map, reflect.Struct:
+			if len(v) == 0 {
+				return map[string]any{}, true
+			}
+		case reflect.Slice, reflect.Array:
+			for i := range v {
+				var r bool
+				v[i], r = emptyObjects(v[i], t.Elem())
+				replaced = replaced || r
+			}
+		}
+	case map[string]any:
+		for key, item := range v {
+			if field, ok := fieldType(t, key); ok {
+				var r bool
+				v[key], r = emptyObjects(item, field)
+				replaced = replaced || r
+			}
+		}
+	}
+	return v, replaced
+}
+
+// fieldType returns the type that the object key decodes into within t,
+// including fields promoted from embedded structs.
+func fieldType(t reflect.Type, key string) (reflect.Type, bool) {
+	switch t.Kind() {
+	case reflect.Map:
+		return t.Elem(), true
+	case reflect.Struct:
+		for i := 0; i < t.NumField(); i++ {
+			field := t.Field(i)
+			name, _, _ := strings.Cut(field.Tag.Get("json"), ",")
+			if name == "-" {
+				continue
+			}
+			embedded := field.Type
+			if embedded.Kind() == reflect.Pointer {
+				embedded = embedded.Elem()
+			}
+			if field.Anonymous && name == "" && embedded.Kind() == reflect.Struct {
+				if found, ok := fieldType(embedded, key); ok {
+					return found, true
+				}
+				continue
+			}
+			if !field.IsExported() {
+				continue
+			}
+			if name == "" {
+				name = field.Name
+			}
+			if strings.EqualFold(name, key) {
+				return field.Type, true
+			}
+		}
+	}
+	return nil, false
 }
 
 // Upload sends body to a presigned storage URL returned by the API. The API
@@ -254,8 +445,10 @@ func (c *Client) Upload(ctx context.Context, method, signedURL string, headers m
 	if len(respBody) > maxResponseBytes {
 		return fmt.Errorf("upload: read response: body exceeds %d bytes", maxResponseBytes)
 	}
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return &APIError{HTTPStatus: resp.StatusCode, Body: truncate(respBody)}
+	// OSS stores the object but answers 203 when the upload callback fails, so
+	// the file never reaches the cloud drive.
+	if resp.StatusCode < 200 || resp.StatusCode > 299 || resp.StatusCode == http.StatusNonAuthoritativeInfo {
+		return &APIError{HTTPStatus: resp.StatusCode, Message: storageErrorMessage(respBody), Body: truncate(respBody)}
 	}
 
 	var apiResp envelope
@@ -272,32 +465,82 @@ type uploadRequestError struct {
 func (e *uploadRequestError) Error() string { return "upload: request failed" }
 func (e *uploadRequestError) Unwrap() error { return e.err }
 
-// waitTurn enforces the documented limit of 1 QPS per interface.
-func (c *Client) waitTurn(ctx context.Context, path string) error {
+// storageErrorMessage returns "Code: Message" from an OSS XML error body.
+func storageErrorMessage(body []byte) string {
+	var e struct {
+		Code    string `xml:"Code"`
+		Message string `xml:"Message"`
+	}
+	if xml.Unmarshal(body, &e) != nil || e.Code == "" {
+		return ""
+	}
+	if e.Message == "" {
+		return e.Code
+	}
+	return e.Code + ": " + e.Message
+}
+
+// waitTurn enforces the documented limit of 1 QPS per interface. The interval
+// starts once the previous request is written, so slow connection setup cannot
+// shorten the gap the server sees. Call the returned function when the request
+// is written or has failed; later calls are ignored.
+func (c *Client) waitTurn(ctx context.Context, path string) (func(), error) {
 	for {
 		c.mu.Lock()
 		if err := ctx.Err(); err != nil {
 			c.mu.Unlock()
-			return err
+			return nil, err
 		}
-		now := time.Now()
-		wait := c.nextRequest[path].Sub(now)
-		if wait <= 0 {
-			c.nextRequest[path] = now.Add(c.minInterval)
+		e := c.endpoints[path]
+		if e == nil {
+			e = &endpoint{}
+			c.endpoints[path] = e
+		}
+		sending := e.sending
+		wait := time.Until(e.next)
+		if sending == nil && wait <= 0 {
+			done := make(chan struct{})
+			e.sending = done
 			c.mu.Unlock()
-			return nil
+			var once sync.Once
+			return func() {
+				once.Do(func() {
+					c.mu.Lock()
+					e.next = time.Now().Add(c.minInterval)
+					e.sending = nil
+					c.mu.Unlock()
+					close(done)
+				})
+			}, nil
 		}
 		c.mu.Unlock()
 
 		// Waiting callers do not reserve future slots. After waking, check
 		// again under the lock in case another caller took this turn.
-		timer := time.NewTimer(wait)
-		select {
-		case <-ctx.Done():
-			timer.Stop()
-			return ctx.Err()
-		case <-timer.C:
+		if sending != nil {
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-sending:
+			}
+		} else if err := sleep(ctx, wait); err != nil {
+			return nil, err
 		}
+	}
+}
+
+// sleep waits for d unless ctx is done first.
+func sleep(ctx context.Context, d time.Duration) error {
+	if d <= 0 {
+		return ctx.Err()
+	}
+	timer := time.NewTimer(d)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
 	}
 }
 

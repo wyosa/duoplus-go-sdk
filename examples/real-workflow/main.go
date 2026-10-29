@@ -1,3 +1,4 @@
+// Command real-workflow powers on a cloud phone and pushes a cloud drive file to it.
 package main
 
 import (
@@ -38,7 +39,7 @@ func run(ctx context.Context, client *duoplus.Client) error {
 		destDir = defaultDestDir
 	}
 
-	phone, err := phoneutil.Select(ctx, client, "")
+	phone, err := phoneutil.Select(ctx, client, os.Getenv("DUOPLUS_TARGET_IMAGE_ID"))
 	if err != nil {
 		return err
 	}

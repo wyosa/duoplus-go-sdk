@@ -1,3 +1,4 @@
+// Package duoplus is a Go client for the DuoPlus cloud phone OpenAPI.
 package duoplus
 
 import (
@@ -53,7 +54,8 @@ type Client struct {
 }
 
 // NewClient defaults to the international host, English, a 30s HTTP timeout,
-// and a 1s interval per endpoint. Reuse the client; requests are not retried.
+// and a 1s interval per endpoint. Reuse the client; only rate-limited requests
+// (HTTP or API code 429) are retried, at most twice.
 func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	if strings.TrimSpace(apiKey) == "" {
 		return nil, errors.New("duoplus api key is required")
@@ -122,7 +124,8 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	}
 }
 
-// WithMinInterval sets the per-endpoint interval for this client; non-positive values are ignored.
+// WithMinInterval sets the per-endpoint interval for this client, counted from when the previous
+// request was written; non-positive values are ignored.
 func WithMinInterval(interval time.Duration) Option {
 	return func(cfg *config) {
 		if interval > 0 {
